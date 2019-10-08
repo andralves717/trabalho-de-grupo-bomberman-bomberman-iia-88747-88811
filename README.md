@@ -1,13 +1,19 @@
-# iia-ia-bomberman
+# iia-bomberman-88747-88811
 Bomberman clone for AI teaching
 
 ## How to install
 
-Make sure you are running Python 3.5.
+Make sure you are running Python 3.5 (or later).
+
+Creating Virtual Environment:
+
+`$ python3 -m venv <nome do virtualenv>`
+`$ source <nome do virtualenv>/bin/activate`
+
+Install requirements:
 
 `$ pip install -r requirements.txt`
 
-*Tip: you might want to create a virtualenv first*
 
 ## How to play
 
