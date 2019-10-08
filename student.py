@@ -4,13 +4,14 @@ import asyncio
 import websockets
 import getpass
 import os
+import random
 
 from mapa import Map
 
 # Next 2 lines are not needed for AI agent
-import pygame
+# import pygame
 
-pygame.init()
+# pygame.init()
 
 
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
@@ -29,11 +30,38 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 #        SPRITES = pygame.image.load("data/pad.png").convert_alpha()
 #        SCREEN.blit(SPRITES, (0, 0))
 
+        key = 'a'
+        x1 = None
+        y1 = None
+
         while True:
             try:
                 state = json.loads(
                     await websocket.recv()
                 )  # receive game state, this must be called timely or your game will get out of sync with the server
+
+
+
+                #aceder à posição, só debug
+                #print(state['bomberman'])
+
+                x, y = state['bomberman']
+
+                if x == x1 and y == y1:
+                    if key in "ad":
+                        key = random.choice("ws")
+                    elif key in "ws":
+                        key = random.choice("ad")
+
+
+                #experimentar bomba a explodir num determinado local
+                #if x == 2 and y == 1:
+                    #key = "B"
+
+
+                x1 = x
+                y1 = y
+
 
                 # Next lines are only for the Human Agent, the key values are nonetheless the correct ones!
 #                key = ""
@@ -59,12 +87,17 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 #                            json.dumps({"cmd": "key", "key": key})
 #                        )  # send key command to server - you must implement this send in the AI agent
 #                        break
+
+                await websocket.send(
+                    json.dumps({"cmd": "key", "key": key})
+                )
+
             except websockets.exceptions.ConnectionClosedOK:
                 print("Server has cleanly disconnected us")
                 return
 
             # Next line is not needed for AI agent
-            pygame.display.flip()
+            # pygame.display.flip()
 
 
 # DO NOT CHANGE THE LINES BELLOW
