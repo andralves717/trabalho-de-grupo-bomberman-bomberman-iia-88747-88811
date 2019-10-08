@@ -33,6 +33,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         key = 'a'
         x1 = None
         y1 = None
+        fuga = 0
 
         while True:
             try:
@@ -47,12 +48,23 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 x, y = state['bomberman']
 
+
                 if x == x1 and y == y1:
                     if key in "ad":
                         key = random.choice("ws")
                     elif key in "ws":
-                        key = random.choice("ad")
+                        key = random.choice("ad")            
 
+                if fuga == 0:
+                    if (x%2 or y%2) and (x!= 1 and x!=49 and y!=1 and y!=29):
+                        key = 'B'
+                        fuga = 2
+                elif fuga == 2:
+                    key = random.choice("ad")
+                    fuga = 1
+                else:
+                    key = random.choice("ws")
+                    fuga = 0
 
                 #experimentar bomba a explodir num determinado local
                 #if x == 2 and y == 1:
