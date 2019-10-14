@@ -5,6 +5,7 @@ import websockets
 import getpass
 import os
 import random
+import math
 
 from mapa import Map
 
@@ -42,34 +43,42 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 )  # receive game state, this must be called timely or your game will get out of sync with the server
 
 
-
                 #aceder à posição, só debug
                 #print(state['bomberman'])
 
                 x, y = state['bomberman']
 
-
                 if x == x1 and y == y1:
                     if key in "ad":
                         key = random.choice("ws")
                     elif key in "ws":
-                        key = random.choice("ad")            
+                        key = random.choice("ad")   
 
-                if fuga == 0:
-                    if (x%2 or y%2) and (x!= 1 and x!=49 and y!=1 and y!=29):
-                        key = 'B'
-                        fuga = 2
-                elif fuga == 2:
-                    key = random.choice("ad")
-                    fuga = 1
-                else:
-                    key = random.choice("ws")
-                    fuga = 0
+               # if fuga == 0:
+                #    if (x%2 or y%2) and (x!= 1 and x!=49 and y!=1 and y!=29):
+                 #       key = 'B'
+                  #      fuga = 2
+                #elif fuga == 2:
+                 #   key = random.choice("ad")
+                  #  fuga = 1
+                #else:
+                 #   key = random.choice("ws")
+                  #  fuga = 0         
 
-                #experimentar bomba a explodir num determinado local
-                #if x == 2 and y == 1:
-                    #key = "B"
-
+                walls = state['walls']
+                for wall in walls:
+                    if(calc_pos((x,y), wall) <= 1):
+                        if fuga == 0:
+                            if not mapa.is_stone(wall):
+                                key = 'B'
+                                fuga = 2
+                        elif fuga == 2:
+                            key = random.choice("ad")
+                            fuga = 1
+                        else:  
+                            key = random.choice("ws")
+                            fuga = 0
+                            
 
                 x1 = x
                 y1 = y
@@ -110,6 +119,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
             # Next line is not needed for AI agent
             # pygame.display.flip()
+
+def calc_pos(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+
+    return math.sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)) 
 
 
 # DO NOT CHANGE THE LINES BELLOW
