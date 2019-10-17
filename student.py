@@ -30,6 +30,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         x1 = None
         y1 = None
         fuga = 0
+        key_save = []
 
         while True:
             try:
@@ -51,39 +52,83 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         if(x < x2):
                             if(x2-x != 1):
                                 key = 'd'
+                                key_save.append(key)
                             elif(mapa.map[x2][y+1] == 2 | mapa.map[x2][y-1] ==2):
                                 key = 'd'
+                                key_save.append(key)
                         elif (x > x2):
                             if(x-x2 != 1):
                                 key = 'a'
+                                key_save.append(key)
                             elif(mapa.map[x2][y+1] == 2 | mapa.map[x2][y-1] ==2):
                                 key = 'a'
+                                key_save.append(key)
                         if (y < y2):
                             if(y2-y != 1):
                                 key = 's'
+                                key_save.append(key)
                             elif(mapa.map[x+1][y2] == 2 | mapa.map[x-1][y2] ==2):
                                 key = 's'
+                                key_save.append(key)
                         elif (y > y2):
                             if(y-y2 != 1):
                                 key = 'w'
+                                key_save.append(key)
                             elif(mapa.map[x+1][y2] == 2 | mapa.map[x-1][y2] ==2):
                                 key = 'w'
+                                key_save.append(key)
 
                         if(mapa.map[x+1][y] == mapa.map[x2][y2] | mapa.map[x-1][y] ==
-                           mapa.map[x2][y2] | mapa.map[x][y-1] == mapa.map[x2][y2] | mapa.map[x][y+1] == mapa.map[x2][y2]):
+                            mapa.map[x2][y2] | mapa.map[x][y-1] == mapa.map[x2][y2] | mapa.map[x][y+1] == mapa.map[x2][y2]):
                             key = 'B'
+                            for i in range(5):
+                                if len(key_save) == 0:
+                                    break
+                                keys2 = key_save.pop()
+                                if(keys2 == 'd'):
+                                    key = 'a'
+                                elif(keys2 == 'a'):
+                                    key = 'd'
+                                elif(keys2 == 'w'):
+                                    key = 's'
+                                elif(keys2 == 's'):
+                                    key = 'w' 
 
                         if(aux == 1):
                             key = 'B'
+                            for i in range(5):
+                                if len(key_save) == 0:
+                                    break
+                                keys2 = key_save.pop()
+                                if(keys2 == 'd'):
+                                    key = 'a'
+                                elif(keys2 == 'a'):
+                                    key = 'd'
+                                elif(keys2 == 'w'):
+                                    key = 's'
+                                elif(keys2 == 's'):
+                                    key = 'w' 
 
 
                 enemies = state['enemies']
 
                 #if(len(walls) == 0):
-                for enemie in enemies:
-                    dist = calc_pos((x,y), enemie["pos"])
-                    if(dist <= 3):
-                        key = 'B'
+                # for enemie in enemies:
+                #     dist = calc_pos((x,y), enemie["pos"])
+                #     if(dist <= 1):
+                #         key = 'B'
+                #         for i in range(5):
+                #             if len(key_save) == 0:
+                #                     break
+                #             keys2 = key_save.pop()
+                #             if(keys2 == 'd'):
+                #                 key = 'a'
+                #             elif(keys2 == 'a'):
+                #                 key = 'd'
+                #             elif(keys2 == 'w'):
+                #                 key = 's'
+                #             elif(keys2 == 's'):
+                #                 key = 'w' 
 
 
                    # if(calc_pos((x,y), wall) <= 1):
