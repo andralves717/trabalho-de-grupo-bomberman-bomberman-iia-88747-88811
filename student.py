@@ -50,50 +50,69 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         aux = dist
                         x2, y2 = wall
                         if(x < x2):
-                            if(x2-x != 1):
+                            if(x2-x == 1):
+                                if(mapa.map[x2][y+1] == 1):
+                                    break
+                                else:
+                                    key = 'd'
+                                    key_save.append(key)
+                            else:
                                 key = 'd'
                                 key_save.append(key)
-                            elif(mapa.map[x2][y+1] == 2 | mapa.map[x2][y-1] ==2):
-                                key = 'd'
-                                key_save.append(key)
+
                         elif (x > x2):
-                            if(x-x2 != 1):
+                            if(x-x2 == 1):
+                                if(mapa.map[x2][y+1] == 1):
+                                    break
+                                else:
+                                    key = 'a'
+                                    key_save.append(key)
+                            else:
                                 key = 'a'
                                 key_save.append(key)
-                            elif(mapa.map[x2][y+1] == 2 | mapa.map[x2][y-1] ==2):
-                                key = 'a'
-                                key_save.append(key)
+
                         if (y < y2):
-                            if(y2-y != 1):
+                            if(y2-y == 1):
+                                if(mapa.map[y2][x+1] == 1):
+                                    break
+                                else:
+                                    key = 's'
+                                    key_save.append(key)
+                            else:
                                 key = 's'
                                 key_save.append(key)
-                            elif(mapa.map[x+1][y2] == 2 | mapa.map[x-1][y2] ==2):
-                                key = 's'
-                                key_save.append(key)
+
+
                         elif (y > y2):
-                            if(y-y2 != 1):
+                            if(y-y2 == 1):
+                                if(mapa.map[y2][x+1] == 1):
+                                    break
+                                else:
+                                    key = 'w'
+                                    key_save.append(key)
+                            else:
                                 key = 'w'
                                 key_save.append(key)
-                            elif(mapa.map[x+1][y2] == 2 | mapa.map[x-1][y2] ==2):
-                                key = 'w'
-                                key_save.append(key)
+
 
                         if(mapa.map[x+1][y] == mapa.map[x2][y2] | mapa.map[x-1][y] ==
                             mapa.map[x2][y2] | mapa.map[x][y-1] == mapa.map[x2][y2] | mapa.map[x][y+1] == mapa.map[x2][y2]):
-                            key = 'B'
-                            for i in range(5):
-                                if len(key_save) == 0:
-                                    break
-                                keys2 = key_save.pop()
-                                if(keys2 == 'd'):
-                                    key = 'a'
-                                elif(keys2 == 'a'):
-                                    key = 'd'
-                                elif(keys2 == 'w'):
-                                    key = 's'
-                                elif(keys2 == 's'):
-                                    key = 'w' 
-
+                            if(key == 'B'):
+                                for i in range(5):
+                                    if len(key_save) == 0:
+                                        break
+                                    keys2 = key_save.pop()
+                                    if(keys2 == 'd'):
+                                        key = 'a'
+                                    elif(keys2 == 'a'):
+                                        key = 'd'
+                                    elif(keys2 == 'w'):
+                                        key = 's'
+                                    elif(keys2 == 's'):
+                                        key = 'w'
+                            else:
+                                key = 'B'
+                        '''
                         if(aux == 1):
                             key = 'B'
                             for i in range(5):
@@ -107,8 +126,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 elif(keys2 == 'w'):
                                     key = 's'
                                 elif(keys2 == 's'):
-                                    key = 'w' 
-
+                                    key = 'w'
+                        '''
 
                 enemies = state['enemies']
 
@@ -160,6 +179,19 @@ def calc_pos(pos1, pos2):
     x2, y2 = pos2
 
     return math.hypot(x1-x2, y1-y2)
+
+
+def minWall(min, wall, walls, pos):
+    x,y = pos
+    if(min < calc_pos):
+        print("Oi")
+    for wall in walls:
+        dist = calc_pos((x,y), wall)
+        if dist < min:
+            aux = dist
+            x2, y2 = wall
+    return "nada"
+
 
 
 # DO NOT CHANGE THE LINES BELLOW
