@@ -46,54 +46,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if destroyed:
                     x2, y2 = minWall(walls,(x,y))
                     destroyed = False
-                if(x < x2):
-                    if(x2-x == 1):
-                        if(mapa.map[x2][y+1] == 1):
-                            break
-                        else:
-                            key = 'd'
-                            key_save.append(key)
-                    else:
-                        key = 'd'
-                        key_save.append(key)
-
-                elif (x > x2):
-                    if(x-x2 == 1):
-                        if(mapa.map[x2][y+1] == 1):
-                            break
-                        else:
-                            key = 'a'
-                            key_save.append(key)
-                    else:
-                        key = 'a'
-                        key_save.append(key)
-
-                if (y < y2):
-                    if(y2-y == 1):
-                        if(mapa.map[y2][x+1] == 1):
-                            break
-                        else:
-                            key = 's'
-                            key_save.append(key)
-                    else:
-                        key = 's'
-                        key_save.append(key)
-
-
-                elif (y > y2):
-                    if(y-y2 == 1):
-                        if(mapa.map[y2][x+1] == 1):
-                            break
-                        else:
-                            key = 'w'
-                            key_save.append(key)
-                    else:
-                        key = 'w'
-                        key_save.append(key)
-
-
-                if(mapa.map[x+1][y] == mapa.map[x2][y2] | mapa.map[x-1][y] ==
-                    mapa.map[x2][y2] | mapa.map[x][y-1] == mapa.map[x2][y2] | mapa.map[x][y+1] == mapa.map[x2][y2]):
+                print ("\nparede:")
+                print (x2,y2)
+                print ("\nEU estou em:")
+                print (x,y)
+                print (mapa.map[x+1][y] == mapa.map[x2][y2])
+                putBomb = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
+                if(putBomb):
+                    print("chega aqui?")
                     if(key == 'B'):
                         for i in range(5):
                             if len(key_save) == 0:
@@ -108,61 +68,59 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             elif(keys2 == 's'):
                                 key = 'w'
                     else:
+                        print("vou por B")
                         key = 'B'
-                        destroyed = True
-                '''
-                if(aux == 1):
-                    key = 'B'
-                    for i in range(5):
-                        if len(key_save) == 0:
+                        #destroyed = True
+                print(key)
+                if(x < x2 and not putBomb):
+                    if(x2-x == 1):
+                        if(mapa.map[x2][y+1] == 1):
                             break
-                        keys2 = key_save.pop()
-                        if(keys2 == 'd'):
-                            key = 'a'
-                        elif(keys2 == 'a'):
+                        else:
                             key = 'd'
-                        elif(keys2 == 'w'):
+                            key_save.append(key)
+                    else:
+                        key = 'd'
+                        key_save.append(key)
+
+                elif (x > x2 and not putBomb):
+                    if(x-x2 == 1):
+                        if(mapa.map[x2][y+1] == 1):
+                            break
+                        else:
+                            key = 'a'
+                            key_save.append(key)
+                    else:
+                        key = 'a'
+                        key_save.append(key)
+                print (key)
+                if (y < y2 and not putBomb):
+                    if(y2-y == 1):
+                        if(mapa.map[y2][x+1] == 1):
+                            break
+                        else:
                             key = 's'
-                        elif(keys2 == 's'):
+                            key_save.append(key)
+                    else:
+                        key = 's'
+                        key_save.append(key)
+
+
+                elif (y > y2 and not putBomb):
+                    if(y-y2 == 1):
+                        if(mapa.map[y2][x+1] == 1):
+                            break
+                        else:
                             key = 'w'
-                '''
+                            key_save.append(key)
+                    else:
+                        key = 'w'
+                        key_save.append(key)
 
                 enemies = state['enemies']
-
-                #if(len(walls) == 0):
-                # for enemie in enemies:
-                #     dist = calc_pos((x,y), enemie["pos"])
-                #     if(dist <= 1):
-                #         key = 'B'
-                #         for i in range(5):
-                #             if len(key_save) == 0:
-                #                     break
-                #             keys2 = key_save.pop()
-                #             if(keys2 == 'd'):
-                #                 key = 'a'
-                #             elif(keys2 == 'a'):
-                #                 key = 'd'
-                #             elif(keys2 == 'w'):
-                #                 key = 's'
-                #             elif(keys2 == 's'):
-                #                 key = 'w' 
-
-
-                   # if(calc_pos((x,y), wall) <= 1):
-                    #    if fuga == 0:
-                     #       key = 'B'
-                      #      fuga = 2
-                       # elif fuga == 2:
-                        #    key = random.choice("ad")
-                         #   fuga = 1
-                       # else:  
-                        #    key = random.choice("ws")
-                         #   fuga = 0
-
+                print (key)
                 x1 = x
                 y1 = y
-
-
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
