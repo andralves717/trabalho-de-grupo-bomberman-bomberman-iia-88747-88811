@@ -25,7 +25,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         y2 = 1
         fuga = 0
         key_save = []
-        destroyed = True
 
         while True:
             try:
@@ -42,12 +41,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     x2, y2 = minWall(walls,(x,y))
                     print("Próxima parede:")
                     print(x2,y2)
-                    destroyed = False
                 print ("\nparede:")
                 print (x2,y2)
                 print ("\nEU estou em:")
                 print (x,y)
-                print (mapa.map[x+1][y] == mapa.map[x2][y2])
 
 
                 kd = False
@@ -78,8 +75,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         kd = True
                         fuga = 5
                         mapa.map[x2][y2]=0
-                        #destroyed = True
-                print(key)
                 if(x < x2 and not putBomb and not kd and not mapa.is_stone((x+1,y))):
                     if(x2-x == 1):
                         if not mapa.is_stone((x2,y+1)) and not kd:
@@ -87,7 +82,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append(key)
                             kd = True
                     else:
-                        print ("meh")
                         key = 'd'
                         key_save.append(key)
                         kd = True
@@ -102,7 +96,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key = 'a'
                         key_save.append(key)
                         kd = True
-                print (key)
                 if (y < y2 and not putBomb and not kd and not mapa.is_stone((x,y+1))):
                     if(y2-y == 1):
                         if not mapa.is_stone((x+1,y2)) and not kd:
