@@ -9,12 +9,6 @@ import math
 
 from mapa import Map
 
-# Next 2 lines are not needed for AI agent
-# import pygame
-
-# pygame.init()
-
-
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
     async with websockets.connect(f"ws://{server_address}/player") as websocket:
 
@@ -27,8 +21,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         mapa = Map(size=game_properties["size"], mapa=game_properties["map"])
 
         key = None
-        x1 = None
-        y1 = None
+        x2 = 1
+        y2 = 1
         fuga = 0
         key_save = []
         destroyed = True
@@ -43,79 +37,94 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 x, y = state['bomberman']
 
                 walls = state['walls']
-                if destroyed:
+                print(mapa.map[x2][y2])
+                if mapa.map[x2][y2]==0:
                     x2, y2 = minWall(walls,(x,y))
+                    print("Próxima parede:")
+                    print(x2,y2)
                     destroyed = False
                 print ("\nparede:")
                 print (x2,y2)
                 print ("\nEU estou em:")
                 print (x,y)
                 print (mapa.map[x+1][y] == mapa.map[x2][y2])
+
+
+                kd = False
+
                 putBomb = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
                 if(putBomb):
                     print("chega aqui?")
-                    if(key == 'B'):
-                        for i in range(5):
-                            if len(key_save) == 0:
-                                break
-                            keys2 = key_save.pop()
-                            if(keys2 == 'd'):
-                                key = 'a'
-                            elif(keys2 == 'a'):
-                                key = 'd'
-                            elif(keys2 == 'w'):
-                                key = 's'
-                            elif(keys2 == 's'):
-                                key = 'w'
+                    if fuga > 0:
+                        if len(key_save) == 0:
+                            continue
+                        keys2 = key_save.pop()
+                        if(keys2 == 'd' and not kd):
+                            key = 'a'
+                            kd = True
+                        elif(keys2 == 'a' and not kd):
+                            key = 'd'
+                            kd = True
+                        elif(keys2 == 'w' and not kd):
+                            key = 's'
+                            kd = True
+                        elif(keys2 == 's' and not kd):
+                            key = 'w'
+                            kd = True
+                        fuga -= 1
                     else:
                         print("vou por B")
                         key = 'B'
+                        kd = True
+                        fuga = 5
+                        mapa.map[x2][y2]=0
                         #destroyed = True
                 print(key)
-                if(x < x2 and not putBomb):
+                if(x < x2 and not putBomb and not kd and not mapa.is_stone((x+1,y))):
                     if(x2-x == 1):
-                        if(mapa.map[x2][y+1] == 1):
-                            break
-                        else:
+                        if not mapa.is_stone((x2,y+1)) and not kd:
                             key = 'd'
                             key_save.append(key)
+                            kd = True
                     else:
+                        print ("meh")
                         key = 'd'
                         key_save.append(key)
+                        kd = True
 
-                elif (x > x2 and not putBomb):
+                elif (x > x2 and not putBomb and not kd and not mapa.is_stone((x-1,y))):
                     if(x-x2 == 1):
-                        if(mapa.map[x2][y+1] == 1):
-                            break
-                        else:
+                        if not mapa.is_stone((x2,y+1) and not kd):
                             key = 'a'
                             key_save.append(key)
+                            kd = True
                     else:
                         key = 'a'
                         key_save.append(key)
+                        kd = True
                 print (key)
-                if (y < y2 and not putBomb):
+                if (y < y2 and not putBomb and not kd and not mapa.is_stone((x,y+1))):
                     if(y2-y == 1):
-                        if(mapa.map[y2][x+1] == 1):
-                            break
-                        else:
+                        if not mapa.is_stone((x+1,y2)) and not kd:
                             key = 's'
                             key_save.append(key)
+                            kd = True
                     else:
                         key = 's'
                         key_save.append(key)
+                        kd = True
 
 
-                elif (y > y2 and not putBomb):
+                elif (y > y2 and not putBomb and not kd and not mapa.is_stone((x,y-1))):
                     if(y-y2 == 1):
-                        if(mapa.map[y2][x+1] == 1):
-                            break
-                        else:
+                        if not mapa.is_stone((x+1,y2)) and not kd:
                             key = 'w'
                             key_save.append(key)
+                            kd = True
                     else:
                         key = 'w'
                         key_save.append(key)
+                        kd = True
 
                 enemies = state['enemies']
                 print (key)
