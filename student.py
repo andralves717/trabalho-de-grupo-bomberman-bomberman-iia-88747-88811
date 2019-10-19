@@ -94,7 +94,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 elif (x > x2 and not putBomb and not kd and not mapa.is_stone((x-1,y))):
                     if(x-x2 == 1):
-                        if not mapa.is_stone((x2,y+1) and not kd):
+                        if not mapa.is_stone((x2,y+1)) and not kd:
                             key = 'a'
                             key_save.append(key)
                             kd = True
