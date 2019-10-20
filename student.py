@@ -41,12 +41,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 ex = state['exit']
 
-                if(walls != []):
-                    if mapa.map[x2][y2]==0:
-                        x2, y2 = minWall(walls,(x,y))
-                        print("Próxima parede:")
-                        print(x2,y2)
-                        destroyed = False
+                if(len(walls) != 0):
+                    #if mapa.map[x2][y2]==0:
+                    x2, y2 = minWall(walls,(x,y))
+                    print("Próxima parede:")
+                    print(x2,y2)
                     print ("\nparede:")
                     print (x2,y2)
                     print ("\nEU estou em:")
@@ -57,9 +56,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     near = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
                     putBomb = [x+1, y] == [x2,y2] or [x-1,y] == [x2,y2] or [x,y-1] == [x2,y2] or [x,y+1] == [x2,y2]
-                    print(near)
-                    print(x2, y2)
                     
+                    print(x2,y2)
+
                     if(near):
                         print("chega aqui?")
                         if fuga > 0:
@@ -73,9 +72,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             print("vou por B")
                             key = 'B'
                             kd = True
-                            fuga = 5
+                            fuga = 4
                             mapa.map[x2][y2]=0
-                            destroyed = True
 
 
 
@@ -124,26 +122,42 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('s')
                             kd = True
 
-
+                    print("aaah")
+                    print(key)
                 # JUST IDEAS, WORKING ON IT
 
-                # else:
-                #     for enemie in enemies:
-                #         dist = calc_pos((x,y), enemie['pos'])
-                #         x_e, y_e = enemie['pos']
+                elif (len(walls) == 0):
+                    # for enemie in enemies:
+                    #     dist = calc_pos((x,y), enemie['pos'])
+                    #     x_e, y_e = enemie['pos']
 
-                #         if(x < x_e):
-                #             key = 'd'
-                #         if(x > x_e):
-                #             key = 'a'
-                #         if(y < y_e):
-                #             key = 's'
-                #         if(y > y_e):
-                #             key = 'w'
+                    #     if(x < x_e):
+                    #         key = 'd'
+                    #     if(x > x_e):
+                    #         key = 'a'
+                    #     if(y < y_e):
+                    #         key = 's'
+                    #     if(y > y_e):
+                    #         key = 'w'
 
-                #         if(dist <= 2):
-                #             key = 'B'
+                    #     if(dist <= 2):
+                    #         key = 'B'
+                    print("ACABARAM AS PAREDES")
+                    print(key)
+                    print(x,y)
+                    print(ex)
+                    xi, yi = ex
 
+                    if(x < xi):
+                        key = 'd'
+                    if(x > xi):
+                        key = 'a'
+                    if(y < yi):
+                        key = 's'
+                    if(y > yi):
+                        key = 'w'
+
+                    
                                 
                 
 
@@ -169,6 +183,7 @@ def minWall(walls, pos):
     if m == None or calc_pos(pos,walls[0]) < calc_pos(pos,m):
         return walls[0]
     return m
+
 
 
 
