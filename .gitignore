@@ -107,3 +107,6 @@ venv.bak/
 *.score
 .DS_Store
 highscores.json
+
+
+.idea/

@@ -123,24 +123,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     print("aaah")
                     print(key)
-                # JUST IDEAS, WORKING ON IT
 
                 elif len(walls) == 0:
-                    # for enemie in enemies:
-                    #     dist = calc_pos((x,y), enemie['pos'])
-                    #     x_e, y_e = enemie['pos']
-
-                    #     if(x < x_e):
-                    #         key = 'd'
-                    #     if(x > x_e):
-                    #         key = 'a'
-                    #     if(y < y_e):
-                    #         key = 's'
-                    #     if(y > y_e):
-                    #         key = 'w'
-
-                    #     if(dist <= 2):
-                    #         key = 'B'
                     print("ACABARAM AS PAREDES")
                     print(key)
                     print(x,y)
