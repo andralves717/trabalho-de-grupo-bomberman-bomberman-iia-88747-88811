@@ -143,18 +143,41 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     #         key = 'B'
                     print("ACABARAM AS PAREDES")
                     print(key)
-                    print(x, y)
-                    print(ex)
-                    xi, yi = ex
+                    print(x,y)
 
-                    if x < xi:
+
+                    if(x < 1):
                         key = 'd'
-                    if x > xi:
+                    if(x > 1):
                         key = 'a'
-                    if y < yi:
+                    if(y < 1):
                         key = 's'
-                    if y > yi:
+                    if(y > 1):
                         key = 'w'
+
+                    for enemie in enemies:
+                        dist = calc_pos((1,1), enemie['pos'])
+
+                        if(dist <= 3):
+                            if fuga > 0:
+                                key = 's'
+                                fuga = 0
+                            else:
+                                key = 'B'
+                                fuga = 2
+
+
+                    # print(ex)
+                    xi, yi = ex
+                    if (len(enemies) == 0):
+                        if(x < xi):
+                            key = 'd'
+                        if(x > xi):
+                            key = 'a'
+                        if(y < yi):
+                            key = 's'
+                        if(y > yi):
+                            key = 'w'
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
