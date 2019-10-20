@@ -36,93 +36,116 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 x, y = state['bomberman']
 
                 walls = state['walls']
-                print(mapa.map[x2][y2])
-                if mapa.map[x2][y2]==0:
-                    x2, y2 = minWall(walls,(x,y))
-                    print("Próxima parede:")
-                    print(x2,y2)
-                print ("\nparede:")
-                print (x2,y2)
-                print ("\nEU estou em:")
-                print (x,y)
-
-
-                kd = False
-
-                putBomb = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
-                if(putBomb):
-                    print("chega aqui?")
-                    if fuga > 0:
-                        if len(key_save) == 0:
-                            continue
-                        keys2 = key_save.pop()
-                        if(keys2 == 'd' and not kd):
-                            key = 'a'
-                            kd = True
-                        elif(keys2 == 'a' and not kd):
-                            key = 'd'
-                            kd = True
-                        elif(keys2 == 'w' and not kd):
-                            key = 's'
-                            kd = True
-                        elif(keys2 == 's' and not kd):
-                            key = 'w'
-                            kd = True
-                        fuga -= 1
-                    else:
-                        print("vou por B")
-                        key = 'B'
-                        kd = True
-                        fuga = 5
-                        mapa.map[x2][y2]=0
-                if(x < x2 and not putBomb and not kd and not mapa.is_stone((x+1,y))):
-                    if(x2-x == 1):
-                        if not mapa.is_stone((x2,y+1)) and not kd:
-                            key = 'd'
-                            key_save.append(key)
-                            kd = True
-                    else:
-                        key = 'd'
-                        key_save.append(key)
-                        kd = True
-
-                elif (x > x2 and not putBomb and not kd and not mapa.is_stone((x-1,y))):
-                    if(x-x2 == 1):
-                        if not mapa.is_stone((x2,y+1)) and not kd:
-                            key = 'a'
-                            key_save.append(key)
-                            kd = True
-                    else:
-                        key = 'a'
-                        key_save.append(key)
-                        kd = True
-                if (y < y2 and not putBomb and not kd and not mapa.is_stone((x,y+1))):
-                    if(y2-y == 1):
-                        if not mapa.is_stone((x+1,y2)) and not kd:
-                            key = 's'
-                            key_save.append(key)
-                            kd = True
-                    else:
-                        key = 's'
-                        key_save.append(key)
-                        kd = True
-
-
-                elif (y > y2 and not putBomb and not kd and not mapa.is_stone((x,y-1))):
-                    if(y-y2 == 1):
-                        if not mapa.is_stone((x+1,y2)) and not kd:
-                            key = 'w'
-                            key_save.append(key)
-                            kd = True
-                    else:
-                        key = 'w'
-                        key_save.append(key)
-                        kd = True
 
                 enemies = state['enemies']
-                print (key)
-                x1 = x
-                y1 = y
+
+                ex = state['exit']
+
+                if(walls != []):
+                    if mapa.map[x2][y2]==0:
+                        x2, y2 = minWall(walls,(x,y))
+                        print("Próxima parede:")
+                        print(x2,y2)
+                        destroyed = False
+                    print ("\nparede:")
+                    print (x2,y2)
+                    print ("\nEU estou em:")
+                    print (x,y)
+
+
+                    kd = False
+
+                    near = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
+                    putBomb = [x+1, y] == [x2,y2] or [x-1,y] == [x2,y2] or [x,y-1] == [x2,y2] or [x,y+1] == [x2,y2]
+                    print(near)
+                    print(x2, y2)
+                    
+                    if(near):
+                        print("chega aqui?")
+                        if fuga > 0:
+                            if len(key_save) == 0:
+                                continue
+                            keys2 = key_save.pop()
+                            key = keys2
+                            kd = True
+                            fuga -= 1
+                        elif(putBomb):
+                            print("vou por B")
+                            key = 'B'
+                            kd = True
+                            fuga = 5
+                            mapa.map[x2][y2]=0
+                            destroyed = True
+
+
+
+                    if(x < x2 and not near and not kd and not mapa.is_stone((x+1,y))):
+                        if(x2-x == 1):
+                            if not mapa.is_stone((x2,y+1)) and not kd:
+                                key = 'd'
+                                key_save.append('a')
+                                kd = True
+                        else:
+                            key = 'd'
+                            key_save.append('a')
+                            kd = True
+
+                    elif (x > x2 and not near and not kd and not mapa.is_stone((x-1,y))):
+                        if(x-x2 == 1):
+                            if not mapa.is_stone((x2,y+1)) and not kd:
+                                key = 'a'
+                                key_save.append('d')
+                                kd = True
+                        else:
+                            key = 'a'
+                            key_save.append('d')
+                            kd = True
+                            
+                    if (y < y2 and not near and not kd and not mapa.is_stone((x,y+1))):
+                        if(y2-y == 1):
+                            if not mapa.is_stone((x+1,y2)) and not kd:
+                                key = 's'
+                                key_save.append('w')
+                                kd = True
+                        else:
+                            key = 's'
+                            key_save.append('w')
+                            kd = True
+
+
+                    elif (y > y2 and not near and not kd and not mapa.is_stone((x,y-1))):
+                        if(y-y2 == 1):
+                            if not mapa.is_stone((x+1,y2)) and not kd:
+                                key = 'w'
+                                key_save.append('s')
+                                kd = True
+                        else:
+                            key = 'w'
+                            key_save.append('s')
+                            kd = True
+
+
+                # JUST IDEAS, WORKING ON IT
+
+                # else:
+                #     for enemie in enemies:
+                #         dist = calc_pos((x,y), enemie['pos'])
+                #         x_e, y_e = enemie['pos']
+
+                #         if(x < x_e):
+                #             key = 'd'
+                #         if(x > x_e):
+                #             key = 'a'
+                #         if(y < y_e):
+                #             key = 's'
+                #         if(y > y_e):
+                #             key = 'w'
+
+                #         if(dist <= 2):
+                #             key = 'B'
+
+                                
+                
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
