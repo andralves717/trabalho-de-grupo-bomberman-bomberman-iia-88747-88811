@@ -9,6 +9,7 @@ import math
 
 from mapa import Map
 
+
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
     async with websockets.connect(f"ws://{server_address}/player") as websocket:
 
@@ -32,7 +33,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     await websocket.recv()
                 )  # receive game state, this must be called timely or your game will get out of sync with the server
 
-
                 x, y = state['bomberman']
 
                 walls = state['walls']
@@ -41,25 +41,27 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 ex = state['exit']
 
-                if(len(walls) != 0):
-                    #if mapa.map[x2][y2]==0:
-                    x2, y2 = minWall(walls,(x,y))
+                if len(walls) != 0:
+                    # if mapa.map[x2][y2]==0:
+                    x2, y2 = minWall(walls, (x, y))
                     print("Próxima parede:")
-                    print(x2,y2)
-                    print ("\nparede:")
-                    print (x2,y2)
-                    print ("\nEU estou em:")
-                    print (x,y)
-
+                    print(x2, y2)
+                    print("\nparede:")
+                    print(x2, y2)
+                    print("\nEU estou em:")
+                    print(x, y)
 
                     kd = False
 
-                    near = mapa.map[x+1][y] == mapa.map[x2][y2] or mapa.map[x-1][y] == mapa.map[x2][y2] or mapa.map[x][y-1] == mapa.map[x2][y2] or mapa.map[x][y+1] == mapa.map[x2][y2]
-                    putBomb = [x+1, y] == [x2,y2] or [x-1,y] == [x2,y2] or [x,y-1] == [x2,y2] or [x,y+1] == [x2,y2]
-                    
-                    print(x2,y2)
+                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or \
+                           mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
+                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,
+                                                                                                             y + 1] == [
+                                  x2, y2]
 
-                    if(near):
+                    print(x2, y2)
+
+                    if near:
                         print("chega aqui?")
                         if fuga > 0:
                             if len(key_save) == 0:
@@ -68,18 +70,16 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key = keys2
                             kd = True
                             fuga -= 1
-                        elif(putBomb):
+                        elif putBomb:
                             print("vou por B")
                             key = 'B'
                             kd = True
                             fuga = 4
-                            mapa.map[x2][y2]=0
+                            mapa.map[x2][y2] = 0
 
-
-
-                    if(x < x2 and not near and not kd and not mapa.is_stone((x+1,y))):
-                        if(x2-x == 1):
-                            if not mapa.is_stone((x2,y+1)) and not kd:
+                    if x < x2 and not near and not kd and not mapa.is_stone((x + 1, y)):
+                        if x2 - x == 1:
+                            if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'd'
                                 key_save.append('a')
                                 kd = True
@@ -88,9 +88,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('a')
                             kd = True
 
-                    elif (x > x2 and not near and not kd and not mapa.is_stone((x-1,y))):
-                        if(x-x2 == 1):
-                            if not mapa.is_stone((x2,y+1)) and not kd:
+                    elif x > x2 and not near and not kd and not mapa.is_stone((x - 1, y)):
+                        if x - x2 == 1:
+                            if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'a'
                                 key_save.append('d')
                                 kd = True
@@ -98,10 +98,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key = 'a'
                             key_save.append('d')
                             kd = True
-                            
-                    if (y < y2 and not near and not kd and not mapa.is_stone((x,y+1))):
-                        if(y2-y == 1):
-                            if not mapa.is_stone((x+1,y2)) and not kd:
+
+                    if y < y2 and not near and not kd and not mapa.is_stone((x, y + 1)):
+                        if y2 - y == 1:
+                            if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 's'
                                 key_save.append('w')
                                 kd = True
@@ -110,10 +110,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('w')
                             kd = True
 
-
-                    elif (y > y2 and not near and not kd and not mapa.is_stone((x,y-1))):
-                        if(y-y2 == 1):
-                            if not mapa.is_stone((x+1,y2)) and not kd:
+                    elif y > y2 and not near and not kd and not mapa.is_stone((x, y - 1)):
+                        if y - y2 == 1:
+                            if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 'w'
                                 key_save.append('s')
                                 kd = True
@@ -126,7 +125,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     print(key)
                 # JUST IDEAS, WORKING ON IT
 
-                elif (len(walls) == 0):
+                elif len(walls) == 0:
                     # for enemie in enemies:
                     #     dist = calc_pos((x,y), enemie['pos'])
                     #     x_e, y_e = enemie['pos']
@@ -144,22 +143,18 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     #         key = 'B'
                     print("ACABARAM AS PAREDES")
                     print(key)
-                    print(x,y)
+                    print(x, y)
                     print(ex)
                     xi, yi = ex
 
-                    if(x < xi):
+                    if x < xi:
                         key = 'd'
-                    if(x > xi):
+                    if x > xi:
                         key = 'a'
-                    if(y < yi):
+                    if y < yi:
                         key = 's'
-                    if(y > yi):
+                    if y > yi:
                         key = 'w'
-
-                    
-                                
-                
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -169,22 +164,21 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 print("Server has cleanly disconnected us")
                 return
 
+
 def calc_pos(pos1, pos2):
     x1, y1 = pos1
     x2, y2 = pos2
 
-    return math.hypot(x1-x2, y1-y2)
+    return math.hypot(x1 - x2, y1 - y2)
 
 
 def minWall(walls, pos):
-    if (walls == []):
-        return 999,999
+    if not walls:
+        return 999, 999
     m = minWall(walls[1:], pos)
-    if m == None or calc_pos(pos,walls[0]) < calc_pos(pos,m):
+    if m == None or calc_pos(pos, walls[0]) < calc_pos(pos, m):
         return walls[0]
     return m
-
-
 
 
 # DO NOT CHANGE THE LINES BELLOW
