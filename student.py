@@ -39,6 +39,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 enemies = state['enemies']
 
+                power_up = state['powerups']
+
+                print("powerup:")
+                print(power_up)
+
                 ex = state['exit']
 
                 if len(walls) != 0:
@@ -53,29 +58,27 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     kd = False
 
-                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or \
-                           mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
-                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,
-                                                                                                             y + 1] == [
-                                  x2, y2]
+                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
+                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,y + 1] == [x2, y2]
 
                     print(x2, y2)
 
-                    if near:
-                        print("chega aqui?")
-                        if fuga > 0:
-                            if len(key_save) == 0:
-                                continue
-                            keys2 = key_save.pop()
-                            key = keys2
-                            kd = True
-                            fuga -= 1
-                        elif putBomb:
-                            print("vou por B")
-                            key = 'B'
-                            kd = True
-                            fuga = 4
-                            mapa.map[x2][y2] = 0
+                    #if (near):
+                    print("chega aqui?")
+                    if (fuga > 0):
+                        if len(key_save) == 0:
+                            continue
+                        keys2 = key_save.pop()
+                        key = keys2
+                        kd = True
+                        fuga -= 1
+                    elif putBomb:
+                        print("vou por B")
+                        key = 'B'
+                        kd = True
+                        fuga = 4
+                        mapa.map[x2][y2] = 0
+
 
                     if x < x2 and not near and not kd and not mapa.is_stone((x + 1, y)):
                         if x2 - x == 1:
@@ -129,15 +132,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     print(key)
                     print(x,y)
 
-
-                    if(x < 1):
-                        key = 'd'
-                    if(x > 1):
-                        key = 'a'
-                    if(y < 1):
-                        key = 's'
-                    if(y > 1):
-                        key = 'w'
+                    
+                    # para ir buscar a powerup
+                    # if(len(power_up) != 0):
+                    #     key = moveTo((x,y),power_up???????????????????????????????????, mapa)
+                        
+                    key = moveTo((x,y),(1,1), mapa)
 
                     for enemie in enemies:
                         dist = calc_pos((1,1), enemie['pos'])
@@ -150,18 +150,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key = 'B'
                                 fuga = 2
 
+                    print(ex)
+                    if(len(enemies) == 0):
+                        key = moveTo((x,y), (ex), mapa)
 
-                    # print(ex)
-                    xi, yi = ex
-                    if (len(enemies) == 0):
-                        if(x < xi):
-                            key = 'd'
-                        if(x > xi):
-                            key = 'a'
-                        if(y < yi):
-                            key = 's'
-                        if(y > yi):
-                            key = 'w'
+                print("keeey")
+                print(key)
 
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -187,6 +181,49 @@ def minWall(walls, pos):
         return walls[0]
     return m
 
+def moveTo(pos1, pos2, mapa):
+    x, y = pos1
+    x2, y2 = pos2
+    key = ""
+
+
+    if x < x2 and not mapa.is_stone((x + 1, y)):
+        if x2 - x == 1:
+            if not mapa.is_stone((x2, y + 1)):
+                key = 'd'
+                #key_save.append('a')
+        else:
+            key = 'd'
+            #key_save.append('a')
+
+    elif x > x2 and not mapa.is_stone((x - 1, y)):
+        if x - x2 == 1:
+            if not mapa.is_stone((x2, y + 1)):
+                key = 'a'
+                #key_save.append('d')
+        else:
+            key = 'a'
+            #key_save.append('d')
+
+    if y < y2 and not mapa.is_stone((x, y + 1)):
+        if y2 - y == 1:
+            if not mapa.is_stone((x + 1, y2)):
+                key = 's'
+                #key_save.append('w')
+        else:
+            key = 's'
+            #key_save.append('w')
+
+    elif y > y2 and not mapa.is_stone((x, y - 1)):
+        if y - y2 == 1:
+            if not mapa.is_stone((x + 1, y2)):
+                key = 'w'
+                #key_save.append('s') and not near and not kd
+        else:
+            key = 'w'
+            #key_save.append('s')
+
+    return key
 
 # DO NOT CHANGE THE LINES BELLOW
 # You can change the default values using the command line, example:
