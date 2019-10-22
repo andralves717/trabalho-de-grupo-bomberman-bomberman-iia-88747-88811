@@ -41,6 +41,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 power_up = state['powerups']
 
+
                 print("powerup:")
                 print(power_up)
 
@@ -64,7 +65,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     print(x2, y2)
 
                     #if (near):
-                    print("chega aqui?")
+                    #print("chega aqui?")
                     if (fuga > 0):
                         if len(key_save) == 0:
                             continue
@@ -132,15 +133,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     print(key)
                     print(x,y)
 
-                    
                     # para ir buscar a powerup
-                    # if(len(power_up) != 0):
-                    #     key = moveTo((x,y),power_up???????????????????????????????????, mapa)
-                        
-                    key = moveTo((x,y),(1,1), mapa)
+                    if(len(power_up) != 0):
+                        key = moveTo((x,y),power_up[0][0], mapa)
+                    else:
+                        key = moveTo((x,y),(1,1), mapa)
 
                     for enemie in enemies:
-                        dist = calc_pos((1,1), enemie['pos'])
+                        dist = calc_pos((x,y), enemie['pos'])
 
                         if(dist <= 3):
                             if fuga > 0:
@@ -186,42 +186,41 @@ def moveTo(pos1, pos2, mapa):
     x2, y2 = pos2
     key = ""
 
-
     if x < x2 and not mapa.is_stone((x + 1, y)):
         if x2 - x == 1:
             if not mapa.is_stone((x2, y + 1)):
                 key = 'd'
                 #key_save.append('a')
-        else:
-            key = 'd'
-            #key_save.append('a')
+            else:
+                key = 'd'
+                #key_save.append('a')
 
     elif x > x2 and not mapa.is_stone((x - 1, y)):
         if x - x2 == 1:
             if not mapa.is_stone((x2, y + 1)):
                 key = 'a'
                 #key_save.append('d')
-        else:
-            key = 'a'
-            #key_save.append('d')
+            else:
+                key = 'a'
+                #key_save.append('d')
 
     if y < y2 and not mapa.is_stone((x, y + 1)):
         if y2 - y == 1:
             if not mapa.is_stone((x + 1, y2)):
                 key = 's'
                 #key_save.append('w')
-        else:
-            key = 's'
-            #key_save.append('w')
+            else:
+                key = 's'
+                #key_save.append('w')
 
     elif y > y2 and not mapa.is_stone((x, y - 1)):
         if y - y2 == 1:
             if not mapa.is_stone((x + 1, y2)):
                 key = 'w'
                 #key_save.append('s') and not near and not kd
-        else:
-            key = 'w'
-            #key_save.append('s')
+            else:
+                key = 'w'
+                #key_save.append('s')
 
     return key
 
