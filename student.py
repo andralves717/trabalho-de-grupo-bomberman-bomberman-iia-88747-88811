@@ -7,7 +7,7 @@ import os
 import random
 import math
 
-from mapa import Map
+from mapa import Map, Tiles
 
 
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
@@ -41,46 +41,51 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 power_up = state['powerups']
 
-
                 print("powerup:")
                 print(power_up)
 
                 ex = state['exit']
-
+                kd = False
+                print(state["bombs"])
+                if len(state["bombs"]) > 0:
+                    key = ""
+                    kd = True
                 if len(walls) != 0:
-                    # if mapa.map[x2][y2]==0:
                     x2, y2 = minWall(walls, (x, y))
-                    print("Próxima parede:")
-                    print(x2, y2)
                     print("\nparede:")
                     print(x2, y2)
                     print("\nEU estou em:")
                     print(x, y)
 
-                    kd = False
-
-                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
-                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,y + 1] == [x2, y2]
+                    x1 = mapa.map[x + 1][y] == mapa.map[x2][y2]
+                    x3 = mapa.map[x - 1][y] == mapa.map[x2][y2]
+                    y1 = mapa.map[x][y - 1] == mapa.map[x2][y2]
+                    y3 = mapa.map[x][y + 1] == mapa.map[x2][y2]
+                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or \
+                           mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
+                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,
+                                                                                                             y + 1] == [
+                                  x2, y2]
 
                     print(x2, y2)
 
-                    #if (near):
-                    #print("chega aqui?")
+                    # if (near):
+                    # print("chega aqui?")
                     if (fuga > 0):
-                        if len(key_save) == 0:
-                            continue
-                        keys2 = key_save.pop()
-                        key = keys2
-                        kd = True
+                        if len(key_save) != 0:
+                            keys2 = key_save.pop()
+                            key = keys2
+                            kd = True
                         fuga -= 1
                     elif putBomb:
                         print("vou por B")
                         key = 'B'
                         kd = True
-                        fuga = 4
-                        mapa.map[x2][y2] = 0
+                        fuga = 5
+                        mapa = removeWalls((x, y), mapa, 4)
+                        mapa.map[x2][y2] = Tiles.PASSAGE
 
-
+                    print(kd)
                     if x < x2 and not near and not kd and not mapa.is_stone((x + 1, y)):
                         if x2 - x == 1:
                             if not mapa.is_stone((x2, y + 1)) and not kd:
@@ -125,24 +130,34 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('s')
                             kd = True
 
+                    if x == x2 and ((y < y2 and mapa.is_stone((x, y + 1))) or (y > y2 and mapa.is_stone((x, y - 1)))):
+                        key = random.choice("ad")
+                        key_save.append('a' if key == 'd' else 'd')
+                        kd = True
+
+                    elif y == y2 and ((x < x2 and mapa.is_stone((x + 1, y))) or (x > x2 and mapa.is_stone((x - 1, y)))):
+                        key = random.choice("ws")
+                        key_save.append('w' if key == 's' else 's')
+                        kd = True
+
                     print("aaah")
                     print(key)
 
                 elif len(walls) == 0:
                     print("ACABARAM AS PAREDES")
                     print(key)
-                    print(x,y)
+                    print(x, y)
 
                     # para ir buscar a powerup
-                    if(len(power_up) != 0):
-                        key = moveTo((x,y),power_up[0][0], mapa)
+                    if (len(power_up) != 0):
+                        key = moveTo((x, y), power_up[0][0], mapa)
                     else:
-                        key = moveTo((x,y),(1,1), mapa)
+                        key = moveTo((x, y), (1, 1), mapa)
 
                     for enemie in enemies:
-                        dist = calc_pos((x,y), enemie['pos'])
+                        dist = calc_pos((x, y), enemie['pos'])
 
-                        if(dist <= 3):
+                        if (dist <= 3):
                             if fuga > 0:
                                 key = 's'
                                 fuga = 0
@@ -151,12 +166,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 fuga = 2
 
                     print(ex)
-                    if(len(enemies) == 0):
-                        key = moveTo((x,y), (ex), mapa)
+                    if (len(enemies) == 0):
+                        key = moveTo((x, y), ex, mapa)
+                    kd = True
 
                 print("keeey")
                 print(key)
-
+                if not kd:
+                    key = ""
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
                 )
@@ -181,6 +198,22 @@ def minWall(walls, pos):
         return walls[0]
     return m
 
+
+def removeWalls(pos, walls, r):
+    if r < 0:
+        return walls
+    x, y = pos
+    if not walls.is_blocked((x + r, y), True):
+        walls.map[x + r][y] = Tiles.PASSAGE
+    if not walls.is_blocked((x - r, y), True):
+        walls.map[x - r][y] == Tiles.PASSAGE
+    if not walls.is_blocked((x, y + r), True):
+        walls.map[x][y + r] == Tiles.PASSAGE
+    if not walls.is_blocked((x, y - r), True):
+        walls.map[x][y - r] == Tiles.PASSAGE
+    return removeWalls((x, y), walls, r - 1)
+
+
 def moveTo(pos1, pos2, mapa):
     x, y = pos1
     x2, y2 = pos2
@@ -190,39 +223,40 @@ def moveTo(pos1, pos2, mapa):
         if x2 - x == 1:
             if not mapa.is_stone((x2, y + 1)):
                 key = 'd'
-                #key_save.append('a')
-            else:
-                key = 'd'
-                #key_save.append('a')
+                # key_save.append('a')
+        else:
+            key = 'd'
+            # key_save.append('a')
 
     elif x > x2 and not mapa.is_stone((x - 1, y)):
         if x - x2 == 1:
             if not mapa.is_stone((x2, y + 1)):
                 key = 'a'
-                #key_save.append('d')
-            else:
-                key = 'a'
-                #key_save.append('d')
+                # key_save.append('d')
+        else:
+            key = 'a'
+            # key_save.append('d')
 
     if y < y2 and not mapa.is_stone((x, y + 1)):
         if y2 - y == 1:
             if not mapa.is_stone((x + 1, y2)):
                 key = 's'
-                #key_save.append('w')
-            else:
-                key = 's'
-                #key_save.append('w')
+                # key_save.append('w')
+        else:
+            key = 's'
+            # key_save.append('w')
 
     elif y > y2 and not mapa.is_stone((x, y - 1)):
         if y - y2 == 1:
             if not mapa.is_stone((x + 1, y2)):
                 key = 'w'
-                #key_save.append('s') and not near and not kd
-            else:
-                key = 'w'
-                #key_save.append('s')
+                # key_save.append('s') and not near and not kd
+        else:
+            key = 'w'
+            # key_save.append('s')
 
     return key
+
 
 # DO NOT CHANGE THE LINES BELLOW
 # You can change the default values using the command line, example:
