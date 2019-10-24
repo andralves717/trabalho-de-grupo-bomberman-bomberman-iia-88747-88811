@@ -83,10 +83,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         kd = True
                         fuga = 5
                         mapa = removeWalls((x, y), mapa, 4)
-                        mapa.map[x2][y2] = Tiles.PASSAGE
+                        mapa.map[x2][y2] = 0
 
                     print(kd)
-                    if x < x2 and not near and not kd and not mapa.is_stone((x + 1, y)):
+                    if x < x2 and not putBomb and not kd and not mapa.is_stone((x + 1, y)):
                         if x2 - x == 1:
                             if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'd'
@@ -97,7 +97,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('a')
                             kd = True
 
-                    elif x > x2 and not near and not kd and not mapa.is_stone((x - 1, y)):
+                    elif x > x2 and not putBomb and not kd and not mapa.is_stone((x - 1, y)):
                         if x - x2 == 1:
                             if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'a'
@@ -108,7 +108,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('d')
                             kd = True
 
-                    if y < y2 and not near and not kd and not mapa.is_stone((x, y + 1)):
+                    if y < y2 and not putBomb and not kd and not mapa.is_stone((x, y + 1)):
                         if y2 - y == 1:
                             if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 's'
@@ -119,7 +119,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('w')
                             kd = True
 
-                    elif y > y2 and not near and not kd and not mapa.is_stone((x, y - 1)):
+                    elif y > y2 and not putBomb and not kd and not mapa.is_stone((x, y - 1)):
                         if y - y2 == 1:
                             if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 'w'
@@ -203,14 +203,15 @@ def removeWalls(pos, walls, r):
     if r < 0:
         return walls
     x, y = pos
+    print(r)
     if not walls.is_blocked((x + r, y), True):
-        walls.map[x + r][y] = Tiles.PASSAGE
+        walls.map[x + r][y] = 0
     if not walls.is_blocked((x - r, y), True):
-        walls.map[x - r][y] == Tiles.PASSAGE
+        walls.map[x - r][y] == 0
     if not walls.is_blocked((x, y + r), True):
-        walls.map[x][y + r] == Tiles.PASSAGE
+        walls.map[x][y + r] == 0
     if not walls.is_blocked((x, y - r), True):
-        walls.map[x][y - r] == Tiles.PASSAGE
+        walls.map[x][y - r] == 0
     return removeWalls((x, y), walls, r - 1)
 
 
