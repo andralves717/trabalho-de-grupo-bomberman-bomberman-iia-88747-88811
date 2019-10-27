@@ -9,6 +9,8 @@ import math
 
 from mapa import Map, Tiles
 
+kd = False
+
 
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
     async with websockets.connect(f"ws://{server_address}/player") as websocket:
@@ -26,6 +28,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         y2 = 1
         fuga = 0
         key_save = []
+        global kd
 
         while True:
             try:
@@ -46,31 +49,26 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 ex = state['exit']
                 kd = False
+
                 print(state["bombs"])
                 if len(state["bombs"]) > 0:
                     key = ""
                     kd = True
+
                 if len(walls) != 0:
+
                     x2, y2 = minWall(walls, (x, y))
                     print("\nparede:")
                     print(x2, y2)
                     print("\nEU estou em:")
                     print(x, y)
 
-                    x1 = mapa.map[x + 1][y] == mapa.map[x2][y2]
-                    x3 = mapa.map[x - 1][y] == mapa.map[x2][y2]
-                    y1 = mapa.map[x][y - 1] == mapa.map[x2][y2]
-                    y3 = mapa.map[x][y + 1] == mapa.map[x2][y2]
-                    near = mapa.map[x + 1][y] == mapa.map[x2][y2] or mapa.map[x - 1][y] == mapa.map[x2][y2] or \
-                           mapa.map[x][y - 1] == mapa.map[x2][y2] or mapa.map[x][y + 1] == mapa.map[x2][y2]
                     putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] or [x, y - 1] == [x2, y2] or [x,
                                                                                                              y + 1] == [
                                   x2, y2]
 
                     print(x2, y2)
 
-                    # if (near):
-                    # print("chega aqui?")
                     if (fuga > 0):
                         if len(key_save) != 0:
                             keys2 = key_save.pop()
@@ -86,7 +84,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         mapa.map[x2][y2] = Tiles.PASSAGE
 
                     print(kd)
-                    if x < x2 and not near and not kd and not mapa.is_stone((x + 1, y)):
+                    if x < x2 and not putBomb and not kd and not mapa.is_stone((x + 1, y)):
                         if x2 - x == 1:
                             if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'd'
@@ -97,7 +95,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('a')
                             kd = True
 
-                    elif x > x2 and not near and not kd and not mapa.is_stone((x - 1, y)):
+                    elif x > x2 and not putBomb and not kd and not mapa.is_stone((x - 1, y)):
                         if x - x2 == 1:
                             if not mapa.is_stone((x2, y + 1)) and not kd:
                                 key = 'a'
@@ -108,7 +106,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('d')
                             kd = True
 
-                    if y < y2 and not near and not kd and not mapa.is_stone((x, y + 1)):
+                    if y < y2 and not putBomb and not kd and not mapa.is_stone((x, y + 1)):
                         if y2 - y == 1:
                             if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 's'
@@ -119,7 +117,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key_save.append('w')
                             kd = True
 
-                    elif y > y2 and not near and not kd and not mapa.is_stone((x, y - 1)):
+                    elif y > y2 and not putBomb and not kd and not mapa.is_stone((x, y - 1)):
                         if y - y2 == 1:
                             if not mapa.is_stone((x + 1, y2)) and not kd:
                                 key = 'w'
@@ -140,9 +138,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key_save.append('w' if key == 's' else 's')
                         kd = True
 
-                    print("aaah")
-                    print(key)
-
                 elif len(walls) == 0:
                     print("ACABARAM AS PAREDES")
                     print(key)
@@ -157,13 +152,29 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     for enemie in enemies:
                         dist = calc_pos((x, y), enemie['pos'])
 
-                        if (dist <= 3):
+                        if(dist <= 3):
                             if fuga > 0:
                                 key = 's'
                                 fuga = 0
                             else:
                                 key = 'B'
                                 fuga = 2
+                            # put = True
+                            # key = 'B'
+                            # print("já pos bomba")
+
+                            # if(mapa.map[x-1][y+1] == 0):
+                            #     print("Keeey s?")
+                            #     key = 's'
+                            #     if(mapa.map[x+1][y] == 0):
+                            #         key = 'd'
+                            #         put = False
+
+                            # if(put == False):
+                            #     if(mapa.map[x-1][y] == 0):
+                            #         key = 'a'
+                            #         if(mapa.map[x][y-1] == 0):
+                            #             key = 'w'
 
                     print(ex)
                     if (len(enemies) == 0):
@@ -218,42 +229,37 @@ def moveTo(pos1, pos2, mapa):
     x, y = pos1
     x2, y2 = pos2
     key = ""
+    global kd
 
-    if x < x2 and not mapa.is_stone((x + 1, y)):
-        if x2 - x == 1:
-            if not mapa.is_stone((x2, y + 1)):
-                key = 'd'
-                # key_save.append('a')
-        else:
-            key = 'd'
-            # key_save.append('a')
+    if x < x2 and not kd and not mapa.is_stone((x + 1, y)):
+        key = 'd'
+        #key_save.append('a')
+        kd = True
 
-    elif x > x2 and not mapa.is_stone((x - 1, y)):
-        if x - x2 == 1:
-            if not mapa.is_stone((x2, y + 1)):
-                key = 'a'
-                # key_save.append('d')
-        else:
-            key = 'a'
-            # key_save.append('d')
+    elif x > x2 and not kd and not mapa.is_stone((x - 1, y)):
+        key = 'a'
+        #key_save.append('d')
+        kd = True
 
-    if y < y2 and not mapa.is_stone((x, y + 1)):
-        if y2 - y == 1:
-            if not mapa.is_stone((x + 1, y2)):
-                key = 's'
-                # key_save.append('w')
-        else:
-            key = 's'
-            # key_save.append('w')
+    if y < y2 and not kd and not mapa.is_stone((x, y + 1)):
+        key = 's'
+        #key_save.append('w')
+        kd = True
 
-    elif y > y2 and not mapa.is_stone((x, y - 1)):
-        if y - y2 == 1:
-            if not mapa.is_stone((x + 1, y2)):
-                key = 'w'
-                # key_save.append('s') and not near and not kd
-        else:
-            key = 'w'
-            # key_save.append('s')
+    elif y > y2 and not kd and not mapa.is_stone((x, y - 1)):
+        key = 'w'
+        #key_save.append('s')
+        kd = True
+
+    if x == x2 and ((y < y2 and mapa.is_stone((x, y + 1))) or (y > y2 and mapa.is_stone((x, y - 1)))):
+        key = random.choice("ad")
+        #key_save.append('a' if key == 'd' else 'd')
+        kd = True
+
+    elif y == y2 and ((x < x2 and mapa.is_stone((x + 1, y))) or (x > x2 and mapa.is_stone((x - 1, y)))):
+        key = random.choice("ws")
+        #key_save.append('w' if key == 's' else 's')
+        kd = True
 
     return key
 
