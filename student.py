@@ -81,7 +81,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         kd = True
                         fuga = 5
                         mapa = removeWalls((x, y), mapa, 4)
-                        mapa.map[x2][y2] = 0
+                        mapa.map[x2][y2] = Tiles.PASSAGE
 
                     print(kd)
                     if x < x2 and not putBomb and not kd and not mapa.is_stone((x + 1, y)):
@@ -214,15 +214,14 @@ def removeWalls(pos, walls, r):
     if r < 0:
         return walls
     x, y = pos
-    print(r)
     if not walls.is_blocked((x + r, y), True):
-        walls.map[x + r][y] = 0
+        walls.map[x + r][y] = Tiles.PASSAGE
     if not walls.is_blocked((x - r, y), True):
-        walls.map[x - r][y] == 0
+        walls.map[x - r][y] == Tiles.PASSAGE
     if not walls.is_blocked((x, y + r), True):
-        walls.map[x][y + r] == 0
+        walls.map[x][y + r] == Tiles.PASSAGE
     if not walls.is_blocked((x, y - r), True):
-        walls.map[x][y - r] == 0
+        walls.map[x][y - r] == Tiles.PASSAGE
     return removeWalls((x, y), walls, r - 1)
 
 
@@ -273,3 +272,4 @@ SERVER = os.environ.get("SERVER", "localhost")
 PORT = os.environ.get("PORT", "8000")
 NAME = os.environ.get("NAME", getpass.getuser())
 loop.run_until_complete(agent_loop(f"{SERVER}:{PORT}", NAME))
+
