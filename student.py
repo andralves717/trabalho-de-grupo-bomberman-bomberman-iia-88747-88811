@@ -64,9 +64,22 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     coiso = (bomb_pos_x, bomb_pos_y) == (x, y)
                 kd = False
 
+                if power_up:
+                    print(power_up[0][0])
+                    if power_up[0][0] == [x+1,y]:
+                        key = 'd'
+                    elif power_up[0][0] == [x-1,y]:
+                        key = 'a'
+                    elif power_up[0][0] == [x,y+1]:
+                        key = 's'
+                    elif power_up[0][0] == [x,y-1]:
+                        key = 'w'
+                    else:
+                        key = get_astar((x, y), power_up[0][0], mapa)
+                    kd = True
 
                 ### ENQUANTO TIVER PAREDES ###
-                if walls:
+                if walls and not kd:
                     
                     x2, y2 = minWall(walls, (x, y))
                     print("MinWall:", (x2,y2))
@@ -118,7 +131,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
                         dist = calc_pos((x, y), ene)
                         xe, ye = ene
-                                
 
                         if dist <= 3:
                             if bomb_time > 0 and bomb:
@@ -172,7 +184,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
 
                 ### QUANDO ACABAREM AS PAREDES ###
-                else:
+                elif not kd:
                     exact = True
 
                     # para ir buscar a powerup
@@ -325,7 +337,6 @@ def moveToWalls(pos1, pos2, mapa):
         key = 'd'
         key_save.append('a')
         #kd = True
-
     elif x > x2 and not kd:
         key = 'a'
         key_save.append('d')
