@@ -152,7 +152,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key = 'B'
                         kd = True
 
-
                         # if enemies:
                         ### inimigos do nível 2 ###
                         # ene_pos = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
