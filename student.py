@@ -65,17 +65,18 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 kd = False
 
                 if power_up:
-                    print(power_up[0][0])
-                    if power_up[0][0] == [x+1,y]:
+                    #print(power_up[0][0])
+                    power_up_x, power_up_y = power_up[0][0]
+                    if (power_up_x, power_up_y)  == (x+1,y):
                         key = 'd'
-                    elif power_up[0][0] == [x-1,y]:
+                    elif (power_up_x, power_up_y)  == (x-1,y):
                         key = 'a'
-                    elif power_up[0][0] == [x,y+1]:
+                    elif (power_up_x, power_up_y)  == (x,y+1):
                         key = 's'
-                    elif power_up[0][0] == [x,y-1]:
+                    elif (power_up_x, power_up_y)  == (x,y-1):
                         key = 'w'
                     else:
-                        key = get_astar((x, y), power_up[0][0], mapa)
+                        key = get_astar((x, y), (power_up_x, power_up_y) , mapa)
                     kd = True
 
                 ### ENQUANTO TIVER PAREDES ###
@@ -86,8 +87,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     key = get_astar((x, y), (x2, y2), mapa)
 
 
-                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] \
-                              or [x, y - 1] == [x2, y2] or [x, y + 1] == [x2, y2]
+                    putBomb = (x + 1, y) == (x2, y2) or (x - 1, y) == (x2, y2) \
+                              or (x, y - 1) == (x2, y2) or (x, y + 1) == (x2, y2)
             
 
                     if bomb_time > 0 and bomb:
@@ -159,7 +160,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                                 if (bomb_pos_x, bomb_pos_y) == (x, y):
                                         key = key_save.pop()
-                                kd = True
                             else:
                                 key = 'B'
                         kd = True
@@ -189,9 +189,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     # para ir buscar a powerup
                     if power_up:
-                        key = get_astar((x, y), power_up[0][0], mapa)
+                        power_up_x, power_up_y = power_up[0][0]
+                        key = get_astar((x, y), (power_up_x, power_up_y), mapa)
                     else:
-                        if enemies:
+                        if enemies and (x, y) != (1, 1):
                             key = get_astar((x, y), (1, 1), mapa)
 
                     if enemies:
@@ -230,14 +231,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     # print(ex)
                     if len(enemies) == 0:
                         # print(kd)
-                        key = get_astar((x, y), ex, mapa)
+                        ex_x, ex_y = ex
+                        key = get_astar((x, y), (ex_x, ex_y), mapa)
                     kd = True
 
                 if not kd:
                     key = ""
-
-                print("Key:",)
-
                     
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -291,24 +290,12 @@ def removeWalls(pos, walls, r):
 def get_astar(pos1, pos2, mapa):
     global exact
     path = astar(mapa.map, pos1, pos2)
-    # print(path)
-
-    # if path == []:
-    #     print("chegou aqui")
-    #     return get_astar(pos1,(1,1),mapa)
-
-    # if len(path) <= 1:
-    #     if exact == True:
-    #         return moveToWalls(pos1, pos2, mapa)
-    #     else:
-    #         return ""
-
+    print(pos1)
+    print(pos2)
     print(path)
+    #print(oheap)
 
-    # if(path != None):
-    return moveToWalls(pos1, path[0], mapa)
-    
-    # return ""
+    return moveToWalls(path[0], path[1], mapa)
 
 
 # função para se mover até às paredes

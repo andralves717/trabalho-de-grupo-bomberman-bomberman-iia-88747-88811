@@ -24,14 +24,15 @@ def astar(array, start, goal):
             while current in came_from:
                 data.append(current)
                 current = came_from[current]
-            return data[::-1]
+            #data.append(start)
+            return [start] + data[::-1]
 
         close_set.add(current)
         for i, j in neighbors:
             neighbor = current[0] + i, current[1] + j            
             tentative_g_score = gscore[current] + heuristic(current, neighbor)
-            if 0 <= neighbor[0] < len(array[0]):
-                if 0 <= neighbor[1] < len(array[1]):                
+            if 0 <= neighbor[0] < len(array):
+                if 0 <= neighbor[1] < len(array[0]):                
                     if array[neighbor[0]][neighbor[1]] == 1:
                         continue
                 else:
@@ -49,5 +50,5 @@ def astar(array, start, goal):
                 gscore[neighbor] = tentative_g_score
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
                 heappush(oheap, (fscore[neighbor], neighbor))
-                
+           
     return None
