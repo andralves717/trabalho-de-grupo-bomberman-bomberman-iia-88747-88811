@@ -82,11 +82,13 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if walls and not kd:
                     
                     x2, y2 = minWall(walls, (x, y))
+                    print("MinWall:", (x2,y2))
                     key = get_astar((x, y), (x2, y2), mapa)
+
 
                     putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] \
                               or [x, y - 1] == [x2, y2] or [x, y + 1] == [x2, y2]
-                    
+            
 
                     if bomb_time > 0 and bomb:
                         if bomb_pos_x == x:
@@ -130,58 +132,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         dist = calc_pos((x, y), ene)
                         xe, ye = ene
 
-                        ### inimigos do nível 2 ###
-
-                        for enemie in enemies:
-                            if enemie['name'] == "Oneal":
-                                key = get_astar((x,y),(xe,ye),mapa)
-
-                                if walls:
-                                    x2, y2 = minWall(walls, (x, y))
-                                    key = get_astar((x, y), (x2, y2), mapa)
-
-                                    putBomb = [x + 1, y] == [x2, y2] or [x - 1, y] == [x2, y2] \
-                                            or [x, y - 1] == [x2, y2] or [x, y + 1] == [x2, y2]
-                                    
-
-                                    if bomb_time > 0 and bomb:
-                                        if bomb_pos_x == x:
-                                            if not mapa.is_stone((x + 1, y)):
-                                                key = 'd'
-                                            elif not mapa.is_stone((x - 1, y)):
-                                                key = 'a'
-                                            else:
-                                                if bomb_pos_y > y:
-                                                    key = 'w'
-                                                else:
-                                                    key = 's'
-                                        elif bomb_pos_y == y:
-                                            if not mapa.is_stone((x, y + 1)):
-                                                key = 's'
-                                            elif not mapa.is_stone((x, y - 1)):
-                                                key = 'w'
-                                            else:
-                                                if bomb_pos_x > x:
-                                                    key = 'a'
-                                                else:
-                                                    key = 'd'
-                                        else:
-                                            key = ''
-
-                                        if (bomb_pos_x, bomb_pos_y) == (x, y):
-                                                key = key_save.pop()
-                                        kd = True
-
-
-                                    if putBomb and not kd:
-                                        print("vou por B")
-                                        key = 'B'
-                                        #kd = True
-                                        fuga = 5
-
-
-
-
                         if dist <= 3:
                             if bomb_time > 0 and bomb:
                                 if bomb_pos_x == x:
@@ -213,6 +163,25 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             else:
                                 key = 'B'
                         kd = True
+
+
+                        # if enemies:
+                        ### inimigos do nível 2 ###
+                        # ene_pos = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
+                        # ene_name = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['name']
+                        # xe1, ye1 = ene_pos
+                        # dist = calc_pos((x, y), (xe1,ye1))
+                        # if ene_name == "Oneal":
+                        #     print("Going to ONEAL")
+                        #     print("Oneal pos",(xe1,ye1))
+                        #     print("I'm at", (x,y))
+                        #     if dist <= 3:
+                        #         key = get_astar((x,y),(xe1,ye1),mapa)
+
+
+
+
+
 
 
                 ### QUANDO ACABAREM AS PAREDES ###
@@ -325,17 +294,22 @@ def get_astar(pos1, pos2, mapa):
     path = astar(mapa.map, pos1, pos2)
     # print(path)
 
-    if path == None:
-        print("Só para avançar")
-        return moveToWalls(pos1, pos2, mapa)
+    # if path == []:
+    #     print("chegou aqui")
+    #     return get_astar(pos1,(1,1),mapa)
 
-    if len(path) <= 1:
-        if exact == True:
-            return moveToWalls(pos1, pos2, mapa)
-        else:
-            return ""
+    # if len(path) <= 1:
+    #     if exact == True:
+    #         return moveToWalls(pos1, pos2, mapa)
+    #     else:
+    #         return ""
 
-    return moveToWalls(path[0], path[1], mapa)
+    print(path)
+
+    # if(path != None):
+    return moveToWalls(pos1, path[0], mapa)
+    
+    # return ""
 
 
 # função para se mover até às paredes
