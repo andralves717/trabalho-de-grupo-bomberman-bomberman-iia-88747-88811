@@ -69,6 +69,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if (power_up_x, power_up_y) == (x + 1, y):
                         key_save.append('a')
                         key = 'd'
+<<<<<<< HEAD
                         if power_up[0][1] == "Detonator":
                             det = True
                     elif (power_up_x, power_up_y) == (x - 1, y):
@@ -113,6 +114,34 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 key_save.pop()
                                 key = 'B'
 
+=======
+                        # powerup_save.append(power_up)
+                        # if power_up[0][1] == "Detonator":
+                        #     det = True
+                    elif (power_up_x, power_up_y)  == (x-1,y):
+                        key_save.append('d')
+                        key = 'a'
+                        # powerup_save.append(power_up)
+                        # if power_up[0][1] == "Detonator":
+                        #     det = True
+                    elif (power_up_x, power_up_y)  == (x,y+1):
+                        key_save.append('w')
+                        key = 's'
+                        # powerup_save.append(power_up)
+                        # if power_up[0][1] == "Detonator":
+                        #     det = True
+                    elif (power_up_x, power_up_y)  == (x,y-1):
+                        key_save.append('s')
+                        key = 'w'
+                        # powerup_save.append(power_up)
+                        # if power_up[0][1] == "Detonator":
+                        #     det = True
+                    else:
+                        key = get_astar((x, y), (power_up_x, power_up_y) , mapa)
+                        #powerup_save.append(power_up)
+                        # if power_up[0][1] == "Detonator":
+                        #     det = True
+>>>>>>> b3f07197e560d59309e7803468c0d2abc7a28fde
                     kd = True
 
                 ### ENQUANTO TIVER PAREDES ###
@@ -203,6 +232,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if not kd:
                     key = ""
 
+<<<<<<< HEAD
                 if len(enemies) == 0 and ex:
                     ex_x, ex_y = ex
                     key = get_astar((x, y), (ex_x, ex_y), mapa)
@@ -230,6 +260,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             key = foge_dai(mapa, (x, y), (x+1, y))
                         else:
                             key = 'B'
+=======
+                if len(enemies) == 0 and ex and power_up:
+                        ex_x, ex_y = ex
+                        key = get_astar((x, y), (ex_x, ex_y), mapa)
+>>>>>>> b3f07197e560d59309e7803468c0d2abc7a28fde
                 kd = True
 
                 await websocket.send(
