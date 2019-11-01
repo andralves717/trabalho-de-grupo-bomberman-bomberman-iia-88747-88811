@@ -14,6 +14,8 @@ kd = False
 key_save = []
 exact = False
 fuga = 0
+#powerup_save = []
+det = False
 
 
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
@@ -33,6 +35,8 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         global key_save
         global kd
         global exact
+        global det
+        #global powerup_save
 
 
         while True:
@@ -68,31 +72,45 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if (power_up_x, power_up_y)  == (x+1,y):
                         key_save.append('a')
                         key = 'd'
+                        # powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     elif (power_up_x, power_up_y)  == (x-1,y):
                         key_save.append('d')
                         key = 'a'
+                        # powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     elif (power_up_x, power_up_y)  == (x,y+1):
                         key_save.append('w')
                         key = 's'
+                        # powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     elif (power_up_x, power_up_y)  == (x,y-1):
                         key_save.append('s')
                         key = 'w'
+                        # powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     else:
                         key = get_astar((x, y), (power_up_x, power_up_y) , mapa)
+                        #powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     kd = True
 
                 ### ENQUANTO TIVER PAREDES ###
                 if walls and not kd:
                     
                     x2, y2 = minWall(walls, (x, y))
-                    print("MinWall:", (x2,y2))
+                    # print("MinWall:", (x2,y2))
                     
-
 
                     putBomb = (x + 1, y) == (x2, y2) or (x - 1, y) == (x2, y2) \
                               or (x, y - 1) == (x2, y2) or (x, y + 1) == (x2, y2)
 
-                    if putBomb:
+                    if putBomb and not det:
                             print("vou por B")
                             key = 'B'
                             kd = True
@@ -103,11 +121,15 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         eneO = None
 
                         ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))
+
+                        ### LEVELS ABOVE 1 ###
                         if level != 1:
+                            
                             eneO = min([e for e in enemies if (e['name'] == "Oneal")],key=lambda e: calc_pos((x, y), e['pos']))
+
                         #eneO = min(en, key=lambda e: calc_pos((x, y), e['pos']))
                         dist = calc_pos((x, y), ene['pos'])
-                        xe, ye = ene['pos']
+                        xe, ye = eneO['pos']
                         dist_ene = 3
 
                         ### INIMIGOS ONEAL ###
@@ -141,6 +163,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if power_up:
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
+                        #powerup_save.append(power_up)
+                        if power_up[0][1] == "Detonator":
+                            det = True
                     else:
                         if enemies and (x, y) != (1, 1):
                             key = get_astar((x, y), (1, 1), mapa)
@@ -163,6 +188,37 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 if not kd:
                     key = ""
+
+                if len(enemies) == 0 and ex:
+                        ex_x, ex_y = ex
+                        key = get_astar((x, y), (ex_x, ex_y), mapa)
+                kd = True
+
+
+                safe = True
+                #for pwup in powerup_save:
+
+                if det:
+                    print(safe)
+                    if putBomb:
+                        print("this B")
+                        key = 'B'
+                        # kd = True
+                        safe = False
+                    if bomb:
+                        print(safe)
+                        print("não chega aqui")
+                        key = foge_dai(mapa,(x,y),(bomb_pos_x,bomb_pos_y))
+                        print("não chega aqui 2")
+                    if calc_pos((x,y),(bomb_pos_x,bomb_pos_y)) > 2:
+                        safe = True
+                        print("SAFE: ",safe)
+                    elif safe:
+                        key = 'A'
+                        print(key)
+                        safe = False
+                                
+                
                     
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -197,7 +253,7 @@ def minWall(walls, pos):
 def get_astar(pos1, pos2, mapa):
     global exact
     path = astar(mapa.map, pos1, pos2)
-    print(path)
+    # print(path)
 
     return moveToWalls(path[0], path[1], mapa)
 

@@ -23,7 +23,7 @@ MAP_SIZE = (51, 31)
 LEVEL_ENEMIES = {
     1: [Balloom] * 6,
     2: [Balloom] * 3 + [Oneal] * 3,
-    3: [Balloom] * 2 + [Oneal] * 2 + [Doll] * 2,
+    3: [Balloom] * 2 * 0+ [Oneal] * 2 * 0 + [Doll] * 2 * 0,
     4: [Balloom] + [Oneal] + [Doll] * 2 + [Minvo] * 2,
     5: [Oneal] * 4 + [Doll] * 3,
     6: [Oneal] * 2 + [Doll] * 3 + [Minvo] * 2,
