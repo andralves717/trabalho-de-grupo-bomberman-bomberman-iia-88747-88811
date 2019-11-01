@@ -14,7 +14,7 @@ kd = False
 key_save = []
 exact = False
 fuga = 0
-# powerup_save = []
+powerup_save = []
 det = False
 
 
@@ -36,7 +36,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         global kd
         global exact
         global det
-        # global powerup_save
+        global powerup_save
 
         while True:
             try:
@@ -71,21 +71,25 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key = 'd'
                         if power_up[0][1] == "Detonator":
                             det = True
+                        powerup_save.append(power_up[0][1])
                     elif (power_up_x, power_up_y) == (x - 1, y):
                         key_save.append('d')
                         key = 'a'
                         if power_up[0][1] == "Detonator":
                             det = True
+                        powerup_save.append(power_up[0][1])
                     elif (power_up_x, power_up_y) == (x, y + 1):
                         key_save.append('w')
                         key = 's'
                         if power_up[0][1] == "Detonator":
                             det = True
+                        powerup_save.append(power_up[0][1])
                     elif (power_up_x, power_up_y) == (x, y - 1):
                         key_save.append('s')
                         key = 'w'
                         if power_up[0][1] == "Detonator":
                             det = True
+                        powerup_save.append(power_up[0][1])
                     else:
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
                         if key == 'w' and minWall(walls, (x, y)) == (x, y - 1):
@@ -177,7 +181,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if power_up:
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
-                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
                     else:
@@ -203,7 +206,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if not kd:
                     key = ""
 
-                if len(enemies) == 0 and ex:
+                if len(enemies) == 0 and ex and (len(powerup_save) == level and power_up == []):
                     ex_x, ex_y = ex
                     key = get_astar((x, y), (ex_x, ex_y), mapa)
                     if key == 'w' and (x2, y2) == (x,y-1):
