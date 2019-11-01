@@ -63,7 +63,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     bomb_pos_x, bomb_pos_y = bomb[0]
                     bomb_time = bomb[1]
-                    coiso = (bomb_pos_x, bomb_pos_y) == (x, y)
                 kd = False
 
                 if power_up:
@@ -185,10 +184,13 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         dist = calc_pos((x, y), ene)
                         xe, ye = ene
                         if dist <= 3 and (x == xe or y == ye):
-                            if bomb:
-                                key = foge_dai(mapa, (x, y), (bomb_pos_x, bomb_pos_y), walls, True)
+                            if bomb_time > 0 and bomb:
+                                key = foge_dai(mapa, (x, y), (bomb_pos_x, bomb_pos_y), walls)
+                                kd = True
                             else:
-                                key = 'B'
+                                if xe == x or ye == y:
+                                    key = 'B'
+                                    kd = True
                         kd = True
 
                     if len(enemies) == 0:
