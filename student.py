@@ -14,7 +14,7 @@ kd = False
 key_save = []
 exact = False
 fuga = 0
-#powerup_save = []
+# powerup_save = []
 det = False
 
 
@@ -36,8 +36,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         global kd
         global exact
         global det
-        #global powerup_save
-
+        # global powerup_save
 
         while True:
             try:
@@ -57,7 +56,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 key = ''
                 level = state['level']
 
-
                 if bombs:
                     bomb = min(bombs, key=lambda b: calc_pos((x, y), b[0]))
 
@@ -67,86 +65,102 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 kd = False
 
                 if power_up:
-                    #print(power_up[0][0])
                     power_up_x, power_up_y = power_up[0][0]
-                    if (power_up_x, power_up_y)  == (x+1,y):
+                    if (power_up_x, power_up_y) == (x + 1, y):
                         key_save.append('a')
                         key = 'd'
-                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
-                    elif (power_up_x, power_up_y)  == (x-1,y):
+                    elif (power_up_x, power_up_y) == (x - 1, y):
                         key_save.append('d')
                         key = 'a'
-                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
-                    elif (power_up_x, power_up_y)  == (x,y+1):
+                    elif (power_up_x, power_up_y) == (x, y + 1):
                         key_save.append('w')
                         key = 's'
-                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
-                    elif (power_up_x, power_up_y)  == (x,y-1):
+                    elif (power_up_x, power_up_y) == (x, y - 1):
                         key_save.append('s')
                         key = 'w'
-                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
                     else:
-                        key = get_astar((x, y), (power_up_x, power_up_y) , mapa)
-                        #powerup_save.append(power_up)
-                        if power_up[0][1] == "Detonator":
-                            det = True
+                        key = get_astar((x, y), (power_up_x, power_up_y), mapa)
+                        if key == 'w' and minWall(walls, (x, y)) == (x, y - 1):
+                            if bomb:
+                                key = foge_dai(mapa, (x, y), (x, y - 1))
+                            else:
+                                key_save.pop()
+                                key = 'B'
+                        elif key == 's' and minWall(walls, (x, y)) == (x, y + 1):
+                            if bomb:
+                                key = foge_dai(mapa, (x, y), (x, y + 1))
+                            else:
+                                key_save.pop()
+                                key = 'B'
+                        elif key == 'a' and minWall(walls, (x, y)) == (x - 1, y):
+                            if bomb:
+                                key = foge_dai(mapa, (x, y), (x - 1, y))
+                            else:
+                                key_save.pop()
+                                key = 'B'
+                        elif key == 'd' and minWall(walls, (x, y)) == (x + 1, y):
+                            if bomb:
+                                key = foge_dai(mapa, (x, y), (x + 1, y))
+                            else:
+                                key_save.pop()
+                                key = 'B'
+
                     kd = True
 
                 ### ENQUANTO TIVER PAREDES ###
                 if walls and not kd:
-                    
+
                     x2, y2 = minWall(walls, (x, y))
-                    # print("MinWall:", (x2,y2))
-                    
 
                     putBomb = (x + 1, y) == (x2, y2) or (x - 1, y) == (x2, y2) \
                               or (x, y - 1) == (x2, y2) or (x, y + 1) == (x2, y2)
 
-                    if putBomb and not det:
-                            print("vou por B")
-                            key = 'B'
-                            kd = True
-        
+                    if putBomb:
+                        print("vou por B")
+                        key = 'B'
+                        kd = True
 
                     ### SE ENCONTRAR INIMIGOS ###
                     if enemies and not putBomb:
-                        eneO = None
 
-                        ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))
+                        ene = sorted(enemies, key=lambda e: calc_pos((x, y), e['pos']))
+                        eneO = [e for e in ene if e['name'] != "Balloom"]
 
                         ### LEVELS ABOVE 1 ###
-                        if level != 1:
-                            
-                            eneO = min([e for e in enemies if (e['name'] == "Oneal")],key=lambda e: calc_pos((x, y), e['pos']))
+                        # if level != 1:
 
-                        #eneO = min(en, key=lambda e: calc_pos((x, y), e['pos']))
-                        dist = calc_pos((x, y), ene['pos'])
-                        xe, ye = eneO['pos']
+                        # eneO = min([e for e in enemies if (e['name'] == "Oneal")],key=lambda e: calc_pos((x, y), e['pos']))
+                        # xe, ye = eneO['pos']
+
+                        # eneO = min(en, key=lambda e: calc_pos((x, y), e['pos']))
+                        dist = calc_pos((x, y), ene[0]['pos'])
+
                         dist_ene = 3
 
                         ### INIMIGOS ONEAL ###
                         if eneO:
                             print("««««««««««««««««««««««««««««««««««««««««««")
-                            key = get_astar((x, y), (xe, ye), mapa)
+                            key = get_astar((x, y), (eneO[0]['pos'][0], eneO[0]['pos'][1]), mapa)
                             kd = True
-                        if ene['name'] == "Oneal":
+                        if ene[0]['name'] == ("Oneal" or "Minvo"):
                             dist_ene = 1
                         if dist <= dist_ene:
                             if bomb_time > 0 and bomb:
                                 key = foge_dai(mapa, (x, y), (bomb_pos_x, bomb_pos_y))
                                 kd = True
                             else:
-                                key = 'B'
-                                kd = True
-                        
+                                if ene[0]['pos'][0] == x or ene[0]['pos'][1] == y:
+                                    key = 'B'
+                                    kd = True
+
                     if bomb_time > 0 and bomb:
                         key = foge_dai(mapa, (x, y), (bomb_pos_x, bomb_pos_y))
                         kd = True
@@ -163,7 +177,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     if power_up:
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
-                        #powerup_save.append(power_up)
+                        # powerup_save.append(power_up)
                         if power_up[0][1] == "Detonator":
                             det = True
                     else:
@@ -176,7 +190,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         xe, ye = ene
                         if dist <= 3 and (x == xe or y == ye):
                             if bomb:
-                                key = foge_dai(mapa, (x,y), (bomb_pos_x, bomb_pos_y), True)
+                                key = foge_dai(mapa, (x, y), (bomb_pos_x, bomb_pos_y), True)
                             else:
                                 key = 'B'
                         kd = True
@@ -190,36 +204,34 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     key = ""
 
                 if len(enemies) == 0 and ex:
-                        ex_x, ex_y = ex
-                        key = get_astar((x, y), (ex_x, ex_y), mapa)
+                    ex_x, ex_y = ex
+                    key = get_astar((x, y), (ex_x, ex_y), mapa)
+                    if key == 'w' and (x2, y2) == (x,y-1):
+                        if bomb:
+                            key_save.pop()
+                            key = foge_dai(mapa, (x, y), (x, y-1))
+                        else:
+                            key = 'B'
+                    elif key == 's' and (x2, y2) == (x,y+1):
+                        if bomb:
+                            key_save.pop()
+                            key = foge_dai(mapa, (x, y), (x, y+1))
+                        else:
+                            key = 'B'
+                    elif key == 'a' and (x2, y2) == (x-1,y):
+                        if bomb:
+                            key_save.pop()
+                            key = foge_dai(mapa, (x, y), (x-1, y))
+                        else:
+                            key = 'B'
+                    elif key == 'd' and (x2, y2) == (x+1, y):
+                        if bomb:
+                            key_save.pop()
+                            key = foge_dai(mapa, (x, y), (x+1, y))
+                        else:
+                            key = 'B'
                 kd = True
 
-
-                safe = True
-                #for pwup in powerup_save:
-
-                if det:
-                    print(safe)
-                    if putBomb:
-                        print("this B")
-                        key = 'B'
-                        # kd = True
-                        safe = False
-                    if bomb:
-                        print(safe)
-                        print("não chega aqui")
-                        key = foge_dai(mapa,(x,y),(bomb_pos_x,bomb_pos_y))
-                        print("não chega aqui 2")
-                    if calc_pos((x,y),(bomb_pos_x,bomb_pos_y)) > 2:
-                        safe = True
-                        print("SAFE: ",safe)
-                    elif safe:
-                        key = 'A'
-                        print(key)
-                        safe = False
-                                
-                
-                    
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
                 )
@@ -247,6 +259,7 @@ def minWall(walls, pos):
     if m is None or calc_pos(pos, walls[0]) < calc_pos(pos, m):
         return walls[0]
     return m
+
 
 # função para implementar o algoritmo a_star
 
@@ -287,6 +300,7 @@ def moveToWalls(pos1, pos2, mapa):
 
 def foge_dai(mapa, pos, bomb_pos, canto=False):
     global key_save
+    global det
     bomb_pos_x, bomb_pos_y = bomb_pos
     x, y = pos
     if (bomb_pos_x, bomb_pos_y) == (x, y):
@@ -323,6 +337,8 @@ def foge_dai(mapa, pos, bomb_pos, canto=False):
                 key_save.append('a')
                 return 'd'
     else:
+        if det:
+            return 'A'
         return ''
 
 
