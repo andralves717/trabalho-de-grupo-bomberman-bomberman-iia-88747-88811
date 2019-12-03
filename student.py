@@ -55,9 +55,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 bombs = state['bombs']
                 bomb = None
                 bomb_time = 0
-                key = ''
+                #key = ''
                 level = state['level']
+                global kd
                 kd = False
+                count = 0
 
                 #### não mexer aqui ####
                 if bombs:
@@ -66,7 +68,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     bomb_time = bomb[1]
                 kd = False
 
-
+                print("\n\n\n")
+                print("lives", state['lives'])
+                print("\n")
+                print("bomb1", bomb)
                 #### não mexer aqui ####
                 # quando encontra uma power_up, vai buscá-la e esta é guardada no powerup_save
                 if power_up:
@@ -135,7 +140,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 # Enquanto tiver paredes...
                 if walls:
-                    
+                    #kd = False
                     # parede mais próxima
                     x2, y2 = minWall(walls, (x, y))
                     
@@ -146,18 +151,19 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     
                      # se não está atrás dos inimigos, vai destruindo paredes
                     if not kd:
+                        print("atras das paredes")
                         key = get_astar((x, y), (x2, y2), mapa)
                         kd = True
                         
                     # Se entretanto encontrar inimigos e não tiver posto nenhuma bomba...
-                    if enemies and not putBomb:
-                        
+                    if enemies:
+                        print("ir atras dos inimigos se nao forem baloons")
                         # devolve a posição do inimigo mais próximo
                         ene = sorted(enemies, key=lambda e: calc_pos((x, y), e['pos']))
                         xe, ye = ene[0]['pos']
 
                         # devolve qualquer inimigo que não seja do tipo Balloom ou Doll
-                        eneO = [e for e in ene if e['name'] != ("Balloom")]
+                        eneO = [e for e in enemies if e['name'] != ("Balloom" or "Doll")]
 
                         # calcula a distância desde a posição atual do bomberman até à posição do inimigo mais próximo
                         dist = calc_pos((x, y), ene[0]['pos'])
@@ -166,24 +172,44 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         dist_ene = 3
 
                         # se o inimigo for do tipo Oneal ou Minvo, a distância passa a ser 1
-                        if ene[0]['name'] == ("Oneal" or "Minvo" or "Kondoria" or "Ovapi" or "Pass" or "Doll"):
+                        if ene[0]['name'] == ("Oneal" or "Minvo" or "Kondoria" or "Ovapi" or "Pass"):
                             dist_ene = 1
 
                         # se o inimigo for de qualquer tipo que não Balloom ou Doll, então vai atrás dele
                         if eneO:
+                            print("eneO: ",ene[0])
+                            print("Perseguir inimigo inteligente")
                             key = get_astar((x, y), (eneO[0]['pos'][0], eneO[0]['pos'][1]), mapa)
                             kd = True
                         
                         # se a distância ao inimigo for menor ou igual que a distância predefinida para o mesmo
+                        print("Raio de ataque: ",dist)
+                        print("DIstancia ao inimigo: ",dist_ene)
                         if dist <= dist_ene:
+                            print("\n")
+                            print("proximo do inimigo")
+                            #kd = False
                             # se o inimigo estiver no mesmo eixo dos x ou do y, então põe bomba
-                            if (ene[0]['pos'][0] == x or ene[0]['pos'][1] == y):
+                            if ene[0]['name'] == "Balloom" or ene[0]['name'] == "Doll":
+                                print("Atacar inimigo dumboos")
                                 key = 'B'
-                                #kd = True
+                                kd = True
+                            elif (ene[0]['pos'][0] == x or ene[0]['pos'][1] == y):
+                                print("Atacar inimigo smarties")
+                                key = 'B'
+                                kd = True
+                                # count += 1
+
+                                # if count > 6:
+                                #     key = get_astar((x, y), (x2, y2), mapa)
+                                #     kd = True
+                                #     count = 0
+                            #kd = True
                     
 
                     # # se estiver num dos locais possíveis, coloca a bomba
                     if putBomb:
+                        print("por bomba")
                         key = 'B'
                         kd = True
 
@@ -193,6 +219,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                     # para ir buscar a powerup
                     if power_up:
+                        print("apanhar powerup")
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
 
@@ -201,55 +228,68 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         powerup_save.append(power_up[0][1])
 
                     else:
-                        if enemies and (x, y) != (1, 1):
-                            key = get_astar((x, y), (1, 1), mapa)
+                        if enemies and (x, y) != mapa.bomberman_spawn:
+                            print("ir pro spawn")
+                            key = get_astar((x, y), (mapa.bomberman_spawn), mapa)
 
                     if enemies:
+                        print("matar restantes")
                         ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
                         dist = calc_pos((x, y), ene)
                         xe, ye = ene
                         if dist <= 3 and (x == xe or y == ye):
+                            print("Bomba restantes")
                             key = 'B'
                         kd = True
 
                     if len(enemies) == 0:
                         ex_x, ex_y = ex
+                        print("Ir para a saida")
                         key = get_astar((x, y), (ex_x, ex_y), mapa)
                     kd = True
                     
 
                 if not kd:
+                    print("Sem kd")
                     key = ""
                 
 
                 if len(enemies) == 0 and ex and (len(powerup_save) == level and power_up == []):
+                    print("EXIT")
                     ex_x, ex_y = ex
                     key = get_astar((x, y), (ex_x, ex_y), mapa)
 
                     if putBomb:
+                        print("Encontrei paredes")
                         key = 'B'
                         kd = True
                         
                 kd = True
 
+                print("bomb2", bomb)
                 if bomb and bomb_time > 0 and not hasGoal:
+                    print("Encontrar sitio seguro")
                     goal = is_free((x,y), enemies, walls, mapa)
                     #kd = True
                     hasGoal = True
                 if bomb and bomb_time > 0 and (x,y) != goal:
+                    print("fugir da bomba")
                     key = get_astar((x,y), goal, mapa)
                     kd = True
                 elif bomb and bomb_time > 0 and not det:
+                    print("Esperar")
                     key = ""
                     kd = True
                 elif not bomb:
                     hasGoal = False
                 elif goal == (x, y) and det:
+                    print("Detonar bomba")
                     key = 'A'
                     kd = True
                     hasGoal = False
 
-                #print("KEY: ",key)
+                print("KEY: ",key)
+                # print("KD", kd)
                     
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
@@ -293,7 +333,7 @@ def moveToWalls(pos1, pos2, mapa):
     key = ""
     global key_save
     global kd
-    kd = True
+    kd = False
 
     if y < y2:
         key = 's'
@@ -392,21 +432,21 @@ def is_free(pos, enemies, walls, mapa):
     x, y = pos
     key = ""
     global kd
-    kd = True
+    # kd = False
     print("isFree")
-    
+
 
     if not [x,y+1] in walls and mapa.map[x][y+1] != 1 and not enemies_on_sight((x,y+1), enemies):
         if not [x+1,y+1] in walls and mapa.map[x+1][y+1] != 1 and not enemies_on_sight((x+1,y+1), enemies):
             return (x+1, y+1)
         if not [x-1,y+1] in walls and mapa.map[x-1][y+1] != 1 and not enemies_on_sight((x-1, y+1), enemies):
-           return (x-1, y+1)
+            return (x-1, y+1)
         if not [x,y+2] in walls and mapa.map[x][y+2] != 1 and not enemies_on_sight((x,y+2), enemies):
             if not [x+1,y+2] in walls and mapa.map[x+1][y+2] != 1 and not enemies_on_sight((x+1,y+2), enemies):
                 return (x+1, y+2)
             if not [x-1,y+2] in walls and mapa.map[x-1][y+2] != 1 and not enemies_on_sight((x-1,y+2), enemies):
                 return (x-1, y+2) 
-    #kd = True
+        #kd = True
 
 
     if not [x+1,y] in walls and mapa.map[x+1][y] != 1 and not enemies_on_sight((x+1,y), enemies):
@@ -443,8 +483,8 @@ def is_free(pos, enemies, walls, mapa):
                 return (x+1, y-2)
             if not [x-1,y-2] in walls and mapa.map[x-1][y-2] != 1 and not enemies_on_sight((x-1,y-2), enemies):
                 return (x-1, y-2)
-    #kd = True
-    
+        #kd = True
+
     return None
 
 
