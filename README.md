@@ -1,6 +1,8 @@
 # iia-bomberman-88747-88811
 Bomberman clone for AI teaching
 
+![Demo](https://github.com/dgomes/iia-ia-bomberman/raw/master/data/DemoBomberman.gif)
+
 ## How to install
 
 Make sure you are running Python 3.5 (or later).
