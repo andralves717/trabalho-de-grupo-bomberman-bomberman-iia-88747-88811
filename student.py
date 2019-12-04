@@ -81,16 +81,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     putBomb = (x + 1, y) == (x2, y2) or (x - 1, y) == (x2, y2) \
                               or (x, y - 1) == (x2, y2) or (x, y + 1) == (x2, y2)
 
-                    if len(enemies) == 0 and ex and (len(powerup_save) == level and power_up == []):
-                        ex_x, ex_y = ex
-                        key = get_astar((x, y), (ex_x, ex_y), mapa)
-                        kd = True
-
-                        if putBomb:
-                            print("Encontrei paredes")
-                            key = 'B'
-                            kd = True
-
                     # se não está atrás dos inimigos, vai destruindo paredes
                     if not kd:
                         print("atras das paredes")
@@ -123,6 +113,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             print("Perseguir inimigo inteligente")
                             key = get_astar((x, y), (eneO[0]['pos'][0], eneO[0]['pos'][1]), mapa)
                             kd = True
+                        elif det:
+                            print("perseguir todos")
+                            key = get_astar((x, y), (ene[0]['pos'][0], ene[0]['pos'][1]), mapa)
+                            kd = True
 
                         # se a distância ao inimigo for menor ou igual que a distância predefinida para o mesmo
                         print("Raio de ataque: ",dist)
@@ -136,17 +130,13 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                                 print("Atacar inimigo dumboos")
                                 key = 'B'
                                 kd = True
+
+
                             elif (ene[0]['pos'][0] == x or ene[0]['pos'][1] == y):
                                 print("Atacar inimigo smarties")
                                 key = 'B'
                                 kd = True
-                                # count += 1
 
-                                # if count > 6:
-                                #     key = get_astar((x, y), (x2, y2), mapa)
-                                #     kd = True
-                                #     count = 0
-                            #kd = True
                     
 
                     #### não mexer aqui ####
@@ -166,6 +156,11 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             powerup_save.append(power_up[0][1])
                     
                 
+                        kd = True
+
+                    if len(enemies) == 0 and ex and power_up == []:
+                        ex_x, ex_y = ex
+                        key = get_astar((x, y), (ex_x, ex_y), mapa)
                         kd = True
 
                     # # se estiver num dos locais possíveis, coloca a bomba
@@ -272,11 +267,14 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 kd = True
 
+                if level == 15:
+                    if len(enemies) == 0:
+                        break
+
                 print("bomb2", bomb)
                 if bomb and bomb_time > 0 and not hasGoal:
                     print("Encontrar sitio seguro")
-                    goal = is_free((x,y), enemies, walls, mapa,5)
-                    #kd = True
+                    goal = is_free((x,y), enemies, walls, mapa, 5)
                     hasGoal = True
                     if goal == None:
                         print("NONENONENONENONE")
@@ -296,8 +294,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     kd = True
                     hasGoal = False
 
-                print("KEY: ",key)
-                # print("KD", kd)
                     
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
