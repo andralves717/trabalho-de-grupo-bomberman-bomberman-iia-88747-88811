@@ -71,7 +71,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 print("\n")
                 print("bomb1", bomb)
 
-
+                print("Posiçao: ",(x,y))
                 # Enquanto tiver paredes...
                 if walls:
                     # parede mais próxima
@@ -149,12 +149,6 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                             #kd = True
                     
 
-                    # # se estiver num dos locais possíveis, coloca a bomba
-                    if putBomb:
-                        print("por bomba")
-                        key = 'B'
-                        kd = True
-
                     #### não mexer aqui ####
                     # quando encontra uma power_up, vai buscá-la e esta é guardada no powerup_save
                     if power_up:
@@ -162,6 +156,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
+                        kd = True
                         print("VAI BUSCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR")
 
                         if power_up[0][1] == "Detonator":
@@ -173,6 +168,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 
                         kd = True
 
+                    # # se estiver num dos locais possíveis, coloca a bomba
+                    if putBomb:
+                        print("por bomba")
+                        key = 'B'
+                        kd = True
+
 
                 ### QUANDO ACABAREM AS PAREDES ###
                 else:
@@ -181,6 +182,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         print("apanhar powerup")
                         power_up_x, power_up_y = power_up[0][0]
                         key = get_astar((x, y), (power_up_x, power_up_y), mapa)
+                        kd = True
 
                         if power_up[0][1] == "Detonator":
                             det = True
@@ -192,16 +194,60 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         if enemies and (x, y) != mapa.bomberman_spawn:
                             print("ir pro spawn")
                             key = get_astar((x, y), (mapa.bomberman_spawn), mapa)
+                            kd = True
 
                     if enemies:
-                        print("matar restantes")
-                        ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
-                        dist = calc_pos((x, y), ene)
-                        xe, ye = ene
-                        if dist <= 3 and (x == xe or y == ye):
-                            print("Bomba restantes")
-                            key = 'B'
-                        kd = True
+                        if (x, y) == mapa.bomberman_spawn:
+                            print("matar restantes no spawn")
+                            ene = min(enemies, key=lambda e: calc_pos((x, y), e['pos']))['pos']
+                            dist = calc_pos((x, y), ene)
+                            xe, ye = ene
+                            if dist <= 3 and (x == xe or y == ye):
+                                print("Bomba restantes")
+                                key = 'B'
+                            kd = True
+                        else:
+                            print("a ir para o spawn")
+                            # devolve a posição do inimigo mais próximo
+                            ene = sorted(enemies, key=lambda e: calc_pos((x, y), e['pos']))
+                            xe, ye = ene[0]['pos']
+
+                            # devolve qualquer inimigo que não seja do tipo Balloom ou Doll
+                            eneO = [e for e in enemies if e['name'] != ("Balloom" or "Doll")]
+
+                            # calcula a distância desde a posição atual do bomberman até à posição do inimigo mais próximo
+                            dist = calc_pos((x, y), ene[0]['pos'])
+
+                            # distância padrão do inimigo
+                            dist_ene = 3
+
+                            # se o inimigo for do tipo Oneal ou Minvo, a distância passa a ser 1
+                            if ene[0]['name'] == ("Oneal" or "Minvo" or "Kondoria" or "Ovapi" or "Pass"):
+                                dist_ene = 1
+
+                            # se o inimigo for de qualquer tipo que não Balloom ou Doll, então vai atrás dele
+                            if eneO:
+                                print("eneO: ",ene[0])
+                                print("Perseguir inimigo inteligente")
+                                key = get_astar((x, y), (eneO[0]['pos'][0], eneO[0]['pos'][1]), mapa)
+                                kd = True
+
+                            # se a distância ao inimigo for menor ou igual que a distância predefinida para o mesmo
+                            print("Raio de ataque: ",dist)
+                            print("DIstancia ao inimigo: ",dist_ene)
+                            if dist <= dist_ene:
+                                print("\n")
+                                print("proximo do inimigo")
+                                #kd = False
+                                # se o inimigo estiver no mesmo eixo dos x ou do y, então põe bomba
+                                if ene[0]['name'] == "Balloom" or ene[0]['name'] == "Doll":
+                                    print("Atacar inimigo dumboos")
+                                    key = 'B'
+                                    kd = True
+                                elif (ene[0]['pos'][0] == x or ene[0]['pos'][1] == y):
+                                    print("Atacar inimigo smarties")
+                                    key = 'B'
+                                    kd = True
 
                     if len(enemies) == 0:
                         ex_x, ex_y = ex
@@ -213,11 +259,12 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     print("Sem kd")
                     key = ""
 
+                print("LEN POQWEUP: ",len(powerup_save))
                 if len(enemies) == 0 and ex and (len(powerup_save) == level and power_up == []):
                     print("EXIT")
                     ex_x, ex_y = ex
                     key = get_astar((x, y), (ex_x, ex_y), mapa)
-
+                    
                     if putBomb:
                         print("Encontrei paredes")
                         key = 'B'
@@ -228,7 +275,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 print("bomb2", bomb)
                 if bomb and bomb_time > 0 and not hasGoal:
                     print("Encontrar sitio seguro")
-                    goal = is_free((x,y), enemies, walls, mapa)
+                    goal = is_free((x,y), enemies, walls, mapa,5)
                     #kd = True
                     hasGoal = True
                     if goal == None:
@@ -313,50 +360,6 @@ def moveToWalls(pos1, pos2, mapa):
     return key
 
 
-# # função para fugir das bombas
-# def foge_dai(mapa, pos, bomb_pos, walls,enemies):
-#     global key_save
-#     bomb_pos_x, bomb_pos_y = bomb_pos
-#     x, y = pos
-#     global det
-
-#     if (bomb_pos_x, bomb_pos_y) == (x, y):
-#             key = key_save.pop()
-#     elif bomb_pos_x == x:
-#         if not mapa.is_stone((x + 1, y)) and not (x+1,y) in walls and not enemies_on_sight((x+1,y),enemies):
-#             print("Fugir -> Direita x")
-#             key = 'd'
-#         elif not mapa.is_stone((x - 1, y)) and not (x-1,y) in walls and not enemies_on_sight((x-1,y),enemies):
-#             print("Fugir -> Esquerda X")
-#             key = 'a'
-#         else:
-#             if bomb_pos_y > y and not enemies_on_sight((x,y+1),enemies) and not mapa.is_stone((x, y+1)) and not (x,y+1) in walls:
-#                 print("Fugir -> Cima X")
-#                 key = 'w'
-#             else:
-#                 print("Fugir -> Baixo X")
-#                 key = 's'
-#     elif bomb_pos_y == y:
-#         if not mapa.is_stone((x, y + 1)) and not (x,y+1) in walls and not enemies_on_sight((x,y+1),enemies):
-#             print("Fugir -> Baixo Y")
-#             key = 's'
-#         elif not mapa.is_stone((x, y - 1)) and not (x,y-1) in walls and not enemies_on_sight((x,y-1),enemies):
-#             print("Fugir -> Cima Y")
-#             key = 'w'
-#         else:
-#             if bomb_pos_x > x and not enemies_on_sight((x-1,y),enemies) and not mapa.is_stone((x - 1, y)) and not (x-1,y) in walls:
-#                 print("Fugir -> Esquerda Y")
-#                 key = 'a'
-#             else:
-#                 print("Fugir -> Direita Y")
-#                 key = 'd'
-#     else:
-#         if det:
-#             return 'A'
-#         key = ''
-
-#     return key
-
 
 def in_range(pos, ene, raio, mapa):
     bx, by = ene
@@ -388,80 +391,96 @@ def in_range(pos, ene, raio, mapa):
     return False
 
 
-def is_free(pos, enemies, walls, mapa):
+def is_free(pos, enemies, walls, mapa, raio):
     x, y = pos
     key = ""
     global kd
     # kd = False
     print("isFree")
+    if raio == 0:
+        return pos
 
-    if not [x,y+1] in walls and mapa.map[x][y+1] != 1 and not enemies_on_sight((x,y+1), enemies):
-        if not [x+1,y+1] in walls and mapa.map[x+1][y+1] != 1 and not enemies_on_sight((x+1,y+1), enemies):
+    if not [x,y+1] in walls and mapa.map[x][y+1] != 1 and not enemies_on_sight((x,y+1), enemies, raio):
+        if not [x+1,y+1] in walls and mapa.map[x+1][y+1] != 1 and not enemies_on_sight((x+1,y+1), enemies, raio):
             return (x+1, y+1)
-        if not [x-1,y+1] in walls and mapa.map[x-1][y+1] != 1 and not enemies_on_sight((x-1, y+1), enemies):
+        if not [x-1,y+1] in walls and mapa.map[x-1][y+1] != 1 and not enemies_on_sight((x-1, y+1), enemies, raio):
             return (x-1, y+1)
-        if not [x,y+2] in walls and mapa.map[x][y+2] != 1 and not enemies_on_sight((x,y+2), enemies):
-            if not [x+1,y+2] in walls and mapa.map[x+1][y+2] != 1 and not enemies_on_sight((x+1,y+2), enemies):
+        if not [x,y+2] in walls and mapa.map[x][y+2] != 1 and not enemies_on_sight((x,y+2), enemies, raio):
+            if not [x+1,y+2] in walls and mapa.map[x+1][y+2] != 1 and not enemies_on_sight((x+1,y+2), enemies, raio):
                 return (x+1, y+2)
-            if not [x-1,y+2] in walls and mapa.map[x-1][y+2] != 1 and not enemies_on_sight((x-1,y+2), enemies):
+            if not [x-1,y+2] in walls and mapa.map[x-1][y+2] != 1 and not enemies_on_sight((x-1,y+2), enemies, raio):
                 return (x-1, y+2) 
         #kd = True
 
 
-    if not [x+1,y] in walls and mapa.map[x+1][y] != 1 and not enemies_on_sight((x+1,y), enemies):
-        if not [x+1,y+1] in walls and mapa.map[x+1][y+1] != 1 and not enemies_on_sight((x+1,y+1), enemies):   
+    if not [x+1,y] in walls and mapa.map[x+1][y] != 1 and not enemies_on_sight((x+1,y), enemies, raio):
+        if not [x+1,y+1] in walls and mapa.map[x+1][y+1] != 1 and not enemies_on_sight((x+1,y+1), enemies, raio):   
             return (x+1, y+1)
-        if not [x+1, y-1] in walls and mapa.map[x+1][y-1] != 1 and not enemies_on_sight((x+1,y-1), enemies):
+        if not [x+1, y-1] in walls and mapa.map[x+1][y-1] != 1 and not enemies_on_sight((x+1,y-1), enemies, raio):
             return (x+1, y-1)
-        if not [x+2,y] in walls and mapa.map[x+2][y] != 1 and not enemies_on_sight((x+2,y), enemies):
-            if not [x+2, y+1] in walls and mapa.map[x+2][y+1] != 1 and not enemies_on_sight((x+2,y+1), enemies):
+        if not [x+2,y] in walls and mapa.map[x+2][y] != 1 and not enemies_on_sight((x+2,y), enemies, raio):
+            if not [x+2, y+1] in walls and mapa.map[x+2][y+1] != 1 and not enemies_on_sight((x+2,y+1), enemies, raio):
                 return (x+2, y+1)
-            if not [x+2,y-1] in walls and mapa.map[x+2][y-1] != 1 and not enemies_on_sight((x+2,y-1), enemies):
+            if not [x+2,y-1] in walls and mapa.map[x+2][y-1] != 1 and not enemies_on_sight((x+2,y-1), enemies, raio):
                 return (x+2, y-1)
     #kd = True
 
-    if not [x-1,y] in walls and mapa.map[x-1][y] != 1 and not enemies_on_sight((x-1, y), enemies):
-        if not [x-1,y+1] in walls and mapa.map[x-1][y+1] != 1 and not enemies_on_sight((x-1,y+1), enemies):
+    if not [x-1,y] in walls and mapa.map[x-1][y] != 1 and not enemies_on_sight((x-1, y), enemies, raio):
+        if not [x-1,y+1] in walls and mapa.map[x-1][y+1] != 1 and not enemies_on_sight((x-1,y+1), enemies, raio):
             return (x-1, y+1)
-        if not [x-1,y-1] in walls and mapa.map[x-1][y-1] != 1 and not enemies_on_sight((x-1,y-1), enemies):
+        if not [x-1,y-1] in walls and mapa.map[x-1][y-1] != 1 and not enemies_on_sight((x-1,y-1), enemies, raio):
             return (x-1, y-1)
-        if not [x-2,y] in walls and mapa.map[x-2][y] != 1 and not enemies_on_sight((x-2,y), enemies):
-            if not [x-2,y+1] in walls and mapa.map[x-2][y+1] != 1 and not enemies_on_sight((x-2,y+1), enemies):
+        if not [x-2,y] in walls and mapa.map[x-2][y] != 1 and not enemies_on_sight((x-2,y), enemies, raio):
+            if not [x-2,y+1] in walls and mapa.map[x-2][y+1] != 1 and not enemies_on_sight((x-2,y+1), enemies, raio):
                 return (x-2, y+1)
-            if not [x-2,y-1] in walls and mapa.map[x-2][y-1] != 1 and not enemies_on_sight((x-2,y-1), enemies):
+            if not [x-2,y-1] in walls and mapa.map[x-2][y-1] != 1 and not enemies_on_sight((x-2,y-1), enemies, raio):
                 return (x-2, y-1) 
     #kd = True
 
-    if not [x,y-1] in walls and mapa.map[x][y-1] != 1 and not enemies_on_sight((x,y-1), enemies):
-        if not [x+1,y-1] in walls and mapa.map[x+1][y-1] != 1 and not enemies_on_sight((x+1,y-1), enemies):
+    if not [x,y-1] in walls and mapa.map[x][y-1] != 1 and not enemies_on_sight((x,y-1), enemies, raio):
+        if not [x+1,y-1] in walls and mapa.map[x+1][y-1] != 1 and not enemies_on_sight((x+1,y-1), enemies, raio):
             return (x+1, y-1)
-        if not [x-1,y-1] in walls and mapa.map[x-1][y-1] != 1 and not enemies_on_sight((x-1,y-1), enemies):
+        if not [x-1,y-1] in walls and mapa.map[x-1][y-1] != 1 and not enemies_on_sight((x-1,y-1), enemies, raio):
             return (x-1, y-1)
-        if not [x,y-2] in walls and mapa.map[x][y-2] != 1 and not enemies_on_sight((x,y-2), enemies):
-            if not [x+1,y-2] in walls and mapa.map[x+1][y-2] != 1 and not enemies_on_sight((x+1,y-2), enemies):
+        if not [x,y-2] in walls and mapa.map[x][y-2] != 1 and not enemies_on_sight((x,y-2), enemies, raio):
+            if not [x+1,y-2] in walls and mapa.map[x+1][y-2] != 1 and not enemies_on_sight((x+1,y-2), enemies, raio):
                 return (x+1, y-2)
-            if not [x-1,y-2] in walls and mapa.map[x-1][y-2] != 1 and not enemies_on_sight((x-1,y-2), enemies):
+            if not [x-1,y-2] in walls and mapa.map[x-1][y-2] != 1 and not enemies_on_sight((x-1,y-2), enemies, raio):
                 return (x-1, y-2)
         #kd = True
 
-    return None
+    print("Nao encontrei")
+    return is_free(pos,enemies,walls,mapa,raio-1)
 
 
-def enemies_on_sight(pos, enemies):
+def enemies_on_sight(pos, enemies,raio):
     x, y = pos
     global kd
     # kd = True
+    print("Raio: ",raio)
 
     for ene in enemies:
-        x2, y2 = ene['pos']
-        # if x == x2 and abs(x - x2) < 3:
-        #     return True
-        # elif y == y2 and abs(y - y2) < 3:
-        #     return True
-        if x == x2 and y == y2:
+        dist = calc_pos(pos,ene['pos'])
+
+        if dist <= raio:
             return True
 
     return False
+
+    #     x2, y2 = ene['pos']
+    #     if x == x2 and y == y2:
+    #         return True
+        
+    #     elif x + 1 == x2 and y == y2:
+    #         return True
+    #     elif x - 1 == x2 and y == y2:
+    #         return True
+    #     elif x == x2 and y + 1 == y2:
+    #         return True
+    #     elif x == x2 and y - 1 == y2:
+    #         return True
+
+    # return False
 
 
 # DO NOT CHANGE THE LINES BELLOW
