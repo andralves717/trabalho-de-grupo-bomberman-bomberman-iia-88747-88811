@@ -15,6 +15,7 @@ exact = False
 fuga = 0
 det = False
 powerup_save = []
+ene_save = []
 
 
 async def agent_loop(server_address="localhost:8000", agent_name="student"):
@@ -36,6 +37,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
         global powerup_save
         global det
         hasGoal = False
+        global ene_save
 
         while True:
             try:
@@ -57,7 +59,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 if state['lives'] == 0:
                     return
                 kd = False
-                count = 0
+                steps = state['step']
 
                 #### não mexer aqui ####
                 if bombs:
@@ -105,7 +107,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         # se o inimigo for do tipo Oneal ou Minvo, a distância passa a ser 1
                         if ene[0]['name'] == ("Oneal" or "Minvo" or "Kondoria" or "Ovapi" or "Pass"):
-                            dist_ene = 1
+                            dist_ene = 2
 
                         # se o inimigo for de qualquer tipo que não Balloom ou Doll, então vai atrás dele
                         if eneO:
@@ -124,18 +126,25 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         if dist <= dist_ene:
                             print("\n")
                             print("proximo do inimigo")
+
+                            if steps %300 == 0:
+                                ene_save.append(len(enemies))
+                                if len(enemies) == ene_save[:-1]:
+                                    key = get_astar((x,y), (x2, y2), mapa)
+                                    kd = True
+
                             #kd = False
                             # se o inimigo estiver no mesmo eixo dos x ou do y, então põe bomba
                             if ene[0]['name'] == "Balloom" or ene[0]['name'] == "Doll":
                                 print("Atacar inimigo dumboos")
                                 key = 'B'
                                 kd = True
-
-
                             elif (ene[0]['pos'][0] == x or ene[0]['pos'][1] == y):
                                 print("Atacar inimigo smarties")
                                 key = 'B'
                                 kd = True
+
+                        
 
                     
 
