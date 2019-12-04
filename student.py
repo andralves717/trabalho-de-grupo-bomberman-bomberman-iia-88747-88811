@@ -70,66 +70,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                 print("lives", state['lives'])
                 print("\n")
                 print("bomb1", bomb)
-                #### não mexer aqui ####
-                # quando encontra uma power_up, vai buscá-la e esta é guardada no powerup_save
-                if power_up:
 
-                    power_up_x, power_up_y = power_up[0][0]
-
-                    if (power_up_x, power_up_y) == (x + 1, y):
-                        key = 'd'
-                        if power_up[0][1] == "Detonator":
-                            det = True
-                        powerup_save.append(power_up[0][1])
-
-                    elif (power_up_x, power_up_y) == (x - 1, y):
-                        key = 'a'
-                        if power_up[0][1] == "Detonator":
-                            det = True
-                        powerup_save.append(power_up[0][1])
-
-                    elif (power_up_x, power_up_y) == (x, y + 1):
-                        key = 's'
-                        if power_up[0][1] == "Detonator":
-                            det = True
-                        powerup_save.append(power_up[0][1])
-
-                    elif (power_up_x, power_up_y) == (x, y - 1):
-                        key = 'w'
-                        if power_up[0][1] == "Detonator":
-                            det = True
-                        powerup_save.append(power_up[0][1])
-
-                    else:
-                        key = get_astar((x, y), (power_up_x, power_up_y), mapa)
-
-                        ### dúvida se é necessário ###
-                        # if key == 'w' and minWall(walls, (x, y)) == (x, y - 1):
-                        #     if bomb:
-                        #         key = foge_dai(mapa, (x, y), (x, y - 1), walls,enemies)
-                        #     else:
-                        #         key_save.pop()
-                        #         key = 'B'
-                        # elif key == 's' and minWall(walls, (x, y)) == (x, y + 1):
-                        #     if bomb:
-                        #         key = foge_dai(mapa, (x, y), (x, y + 1), walls,enemies)
-                        #     else:
-                        #         key_save.pop()
-                        #         key = 'B'
-                        # elif key == 'a' and minWall(walls, (x, y)) == (x - 1, y):
-                        #     if bomb:
-                        #         key = foge_dai(mapa, (x, y), (x - 1, y), walls,enemies)
-                        #     else:
-                        #         key_save.pop()
-                        #         key = 'B'
-                        # elif key == 'd' and minWall(walls, (x, y)) == (x + 1, y):
-                        #     if bomb:
-                        #         key = foge_dai(mapa, (x, y), (x + 1, y), walls,enemies)
-                        #     else:
-                        #         key_save.pop()
-                        #         key = 'B'
-
-                    kd = True
 
                 # Enquanto tiver paredes...
                 if walls:
@@ -139,6 +80,16 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     # locais onde pode colocar a bomba (à volta da parede)
                     putBomb = (x + 1, y) == (x2, y2) or (x - 1, y) == (x2, y2) \
                               or (x, y - 1) == (x2, y2) or (x, y + 1) == (x2, y2)
+
+                    if len(enemies) == 0 and ex and (len(powerup_save) == level and power_up == []):
+                        ex_x, ex_y = ex
+                        key = get_astar((x, y), (ex_x, ex_y), mapa)
+                        kd = True
+
+                        if putBomb:
+                            print("Encontrei paredes")
+                            key = 'B'
+                            kd = True
 
                     # se não está atrás dos inimigos, vai destruindo paredes
                     if not kd:
@@ -204,10 +155,27 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                         key = 'B'
                         kd = True
 
+                    #### não mexer aqui ####
+                    # quando encontra uma power_up, vai buscá-la e esta é guardada no powerup_save
+                    if power_up:
+                        print("FODA-SEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+
+                        power_up_x, power_up_y = power_up[0][0]
+                        key = get_astar((x, y), (power_up_x, power_up_y), mapa)
+                        print("VAI BUSCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR")
+
+                        if power_up[0][1] == "Detonator":
+                                det = True
+
+                        if (len(powerup_save) == level - 1):
+                            powerup_save.append(power_up[0][1])
+                    
+                
+                        kd = True
+
 
                 ### QUANDO ACABAREM AS PAREDES ###
                 else:
-
                     # para ir buscar a powerup
                     if power_up:
                         print("apanhar powerup")
@@ -216,7 +184,9 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         if power_up[0][1] == "Detonator":
                             det = True
-                        powerup_save.append(power_up[0][1])
+                        
+                        if (len(powerup_save) == level - 1):
+                            powerup_save.append(power_up[0][1])
 
                     else:
                         if enemies and (x, y) != mapa.bomberman_spawn:
@@ -484,10 +454,10 @@ def enemies_on_sight(pos, enemies):
 
     for ene in enemies:
         x2, y2 = ene['pos']
-        if x == x2 and abs(x - x2) < 3:
-            return True
-        elif y == y2 and abs(y - y2) < 3:
-            return True
+        # if x == x2 and abs(x - x2) < 3:
+        #     return True
+        # elif y == y2 and abs(y - y2) < 3:
+        #     return True
         if x == x2 and y == y2:
             return True
 
