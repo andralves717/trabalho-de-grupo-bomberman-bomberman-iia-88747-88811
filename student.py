@@ -109,7 +109,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         # se o inimigo for de qualquer tipo que não Balloom ou Doll, então vai atrás dele
                         if eneO:
-                            print("eneO: ",ene[0])
+                            print("eneO: ", ene[0])
                             print("Perseguir inimigo inteligente")
                             key = get_astar((x, y), (eneO[0]['pos'][0], eneO[0]['pos'][1]), mapa)
                             kd = True
@@ -154,14 +154,15 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                         if (len(powerup_save) == level - 1):
                             powerup_save.append(power_up[0][1])
-                    
-                
-                        kd = True
 
-                    if len(enemies) == 0 and ex and power_up == []:
+                    if len(enemies) == 0 and ex and len(powerup_save) == level and not kd:
                         ex_x, ex_y = ex
+                        mapa.map[ex_x][ex_y] = 0
                         key = get_astar((x, y), (ex_x, ex_y), mapa)
                         kd = True
+                    elif len(powerup_save) != level and ex:
+                        ex_x, ex_y = ex
+                        mapa.map[ex_x][ex_y] = 1
 
                     # # se estiver num dos locais possíveis, coloca a bomba
                     if putBomb:
@@ -269,7 +270,7 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
 
                 if level == 15:
                     if len(enemies) == 0:
-                        break
+                        return
 
                 print("bomb2", bomb)
                 if bomb and bomb_time > 0 and not hasGoal:
@@ -294,7 +295,10 @@ async def agent_loop(server_address="localhost:8000", agent_name="student"):
                     kd = True
                     hasGoal = False
 
-                    
+                if ex:
+                    ex_x, ex_y = ex
+                    mapa.map[ex_x][ex_y] = 0
+
                 await websocket.send(
                     json.dumps({"cmd": "key", "key": key})
                 )
